@@ -1,0 +1,5 @@
+PyInstaller>=3.4,<3.5
+pypiwin32==223
+pywin32==223
+pywin32-ctypes==0.2.0
+
