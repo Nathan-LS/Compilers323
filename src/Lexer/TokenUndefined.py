@@ -1,7 +1,7 @@
 from .TokenBase import TokenBase
 
 
-class TokenIdentifier(TokenBase):
+class TokenUndefined(TokenBase):
     @classmethod
     def reserved(cls):
         return
@@ -9,4 +9,4 @@ class TokenIdentifier(TokenBase):
 
     @classmethod
     def accepting_states(cls):
-        yield 2
+        yield 5

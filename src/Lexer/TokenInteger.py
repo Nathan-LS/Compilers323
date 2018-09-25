@@ -3,7 +3,10 @@ from .TokenBase import TokenBase
 
 class TokenInteger(TokenBase):
     @classmethod
+    def reserved(cls):
+        return
+        yield
+
+    @classmethod
     def accepting_states(cls):
-        """examples"""
-        yield 1
-        yield 2
+        yield 3
