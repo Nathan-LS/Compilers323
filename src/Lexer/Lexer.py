@@ -23,7 +23,7 @@ class Lexer(object):
     def lex_recursive_generator(cls, file_ptr, current_state=1, token_str=''):
         """yields all token instances given a file pointer"""
         next_char: str = file_ptr.read(1)
-        if TokenBase.is_reserved(next_char): # hit whitespace or char that signals an end of token i.e =, >, etc
+        if TokenBase.is_reserved(next_char):  # hit whitespace or char that signals an end of token i.e =, >, etc
             if TokenBase.is_in_accepting_states(current_state):
                 yield TokenBase.get_token(current_state, token_str)  # make the token given the token_str and current state
                 current_state = 1  # reset to starting state
@@ -34,7 +34,7 @@ class Lexer(object):
                 token_str = ''
             else:
                 pass
-        elif TokenOperator.is_accepting_state(current_state) or TokenSeparator.is_accepting_state(current_state):  # if in accepting state for a single char ie op, yield immediately
+        elif current_state in TokenBase.states_yield_immediate():  # if in accepting state for a single char ie op, yield immediately
             yield TokenBase.get_token(current_state, token_str)
             current_state = 1
             token_str = ''
