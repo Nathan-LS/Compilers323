@@ -9,8 +9,7 @@ class TokenBase(ABC):
     def __get_subclasses(cls):
         """yield Base class and all child classes"""
         yield cls
-        for subc in cls.__subclasses__():
-            yield subc
+        yield from cls.__subclasses__()
 
     @classmethod
     def is_symbol(cls, ch):
