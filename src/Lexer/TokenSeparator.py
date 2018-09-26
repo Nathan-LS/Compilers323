@@ -1,12 +1,12 @@
 from .TokenBase import TokenBase
 
 
-class TokenUndefined(TokenBase):
+class TokenSeparator(TokenBase):
     @classmethod
     def reserved(cls):
-        return
-        yield
+        yield '('
+        yield ')'
 
     @classmethod
     def accepting_states(cls):
-        yield 8
+        yield 7

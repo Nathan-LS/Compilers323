@@ -60,4 +60,4 @@ class TokenBase(ABC):
         yield
 
     def __str__(self):
-        return "token: {}, lexeme: '{}'".format(self.__class__.__name__, self.__lexeme)
+        return "token: {:<12} lexeme: '{}'".format(self.__class__.__name__.replace("Token", ''), self.__lexeme)

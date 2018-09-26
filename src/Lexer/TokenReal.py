@@ -9,5 +9,4 @@ class TokenReal(TokenBase):
 
     @classmethod
     def accepting_states(cls):
-        return  # no accepting states yet
-        yield
+        yield 5

@@ -12,4 +12,4 @@ class TokenOperator(TokenBase):
 
     @classmethod
     def accepting_states(cls):
-        yield 4
+        yield 6
