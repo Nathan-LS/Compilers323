@@ -5,4 +5,5 @@ from .TokenReal import TokenReal
 from .TokenOperator import TokenOperator
 from .TokenUndefined import TokenUndefined
 from .TokenSeparator import TokenSeparator
+from .TokenKeyword import TokenKeyword
 from .Lexer import Lexer
