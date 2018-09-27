@@ -24,14 +24,14 @@ class Lexer(object):
         """yields all token instances given a file pointer"""
         next_char: str = file_ptr.read(1)
         if TokenBase.is_reserved(next_char):  # hit whitespace or char that signals an end of token i.e =, >, etc
-            if TokenBase.is_in_accepting_states(current_state):
+            if TokenBase.is_an_accepting_state(current_state):
                 if TokenKeyword.is_reserved(token_str):  # special case check for keywords
                     yield TokenKeyword(token_str)
                 else:
                     yield TokenBase.get_token(current_state, token_str)  # make the token given the token_str and current state
                 current_state = 1  # reset to starting state
                 token_str = ''
-            elif current_state != 1:
+            elif current_state != 1:  # cannot yield starting state, get more chars
                 yield TokenUndefined(token_str)
                 current_state = 1
                 token_str = ''

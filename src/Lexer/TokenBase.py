@@ -13,7 +13,7 @@ class TokenBase(ABC):
 
     @classmethod
     def is_symbol(cls, ch):
-        """returns if the given char belongs to a token type"""
+        """returns true if the given char belongs to a token type"""
         return ch in cls.reserved()
 
     @classmethod
@@ -25,22 +25,18 @@ class TokenBase(ABC):
         return False
 
     @classmethod
-    def is_accepting_state(cls, current_state):
-        """determine if the given state is an accepting state for the token class"""
-        return current_state in cls.accepting_states()
-
-    @classmethod
-    def is_in_accepting_states(cls, current_state):
+    def is_an_accepting_state(cls, current_state):
         """determine if the given state is actually an accepting state among any subclasses"""
         for TokenClasses in cls.__get_subclasses():
-            if TokenClasses.is_accepting_state(current_state):
+            if current_state in TokenClasses.accepting_states():
                 return True
         return False
 
     @classmethod
     def get_token(cls, current_state, token_str):
+        """make a token given a state"""
         for TokenClasses in cls.__get_subclasses():
-            if TokenClasses.is_accepting_state(current_state):
+            if current_state in TokenClasses.accepting_states():
                 return TokenClasses(token_str)
 
     @classmethod
