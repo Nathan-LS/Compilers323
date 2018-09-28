@@ -51,8 +51,8 @@ class TokenBase(ABC):
     @classmethod
     def states_yield_immediate(cls):
         """single char states that must be yielded immediately. i.e. op, sep"""
-        yield 6  # operator
-        yield 7  # separator
+        yield 7  # operator
+        yield 8  # separator
 
     @classmethod
     @abstractmethod

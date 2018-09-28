@@ -9,4 +9,4 @@ class TokenSeparator(TokenBase):
 
     @classmethod
     def accepting_states(cls):
-        yield 7
+        yield 8

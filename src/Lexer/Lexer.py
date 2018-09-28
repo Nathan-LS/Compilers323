@@ -49,21 +49,23 @@ class Lexer(object):
         if not TokenBase.is_symbol(next_char):  # skips whitespace, tabs, newline
             token_str += next_char
             if current_state == 1:
-                next_state = cls.lex_state_mapper(next_char, 2, 3, 6, 7, 8, 8)
+                next_state = cls.lex_state_mapper(next_char, 2, 4, 7, 8, 9, 9)
             elif current_state == 2:
-                next_state = cls.lex_state_mapper(next_char, 2, 2, 8, 8, 8, 8)
+                next_state = cls.lex_state_mapper(next_char, 2, 3, 9, 9, 9, 9)
             elif current_state == 3:
-                next_state = cls.lex_state_mapper(next_char, 8, 3, 8, 8, 4, 8)
+                next_state = cls.lex_state_mapper(next_char, 2, 3, 9, 9, 9, 9)
             elif current_state == 4:
-                next_state = cls.lex_state_mapper(next_char, 8, 5, 8, 8, 8, 8)
+                next_state = cls.lex_state_mapper(next_char, 9, 4, 9, 9, 5, 9)
             elif current_state == 5:
-                next_state = cls.lex_state_mapper(next_char, 8, 5, 8, 8, 8, 8)
+                next_state = cls.lex_state_mapper(next_char, 9, 6, 9, 9, 9, 9)
             elif current_state == 6:
-                next_state = cls.lex_state_mapper(next_char, 8, 8, 8, 8, 8, 8)
+                next_state = cls.lex_state_mapper(next_char, 9, 6, 9, 9, 9, 9)
             elif current_state == 7:
-                next_state = cls.lex_state_mapper(next_char, 8, 8, 8, 8, 8, 8)
-            else:
-                next_state = cls.lex_state_mapper(next_char, 8, 8, 8, 8, 8, 8)
+                next_state = cls.lex_state_mapper(next_char, 9, 9, 9, 9, 9, 9)
+            elif current_state == 8:
+                next_state = cls.lex_state_mapper(next_char, 9, 9, 9, 9, 9, 9)
+            else:  # state 9 or undefined
+                next_state = cls.lex_state_mapper(next_char, 9, 9, 9, 9, 9, 9)
         yield from cls.lex_recursive_generator(file_ptr, next_state, token_str)
 
     @classmethod

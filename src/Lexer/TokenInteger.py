@@ -9,4 +9,4 @@ class TokenInteger(TokenBase):
 
     @classmethod
     def accepting_states(cls):
-        yield 3
+        yield 4
