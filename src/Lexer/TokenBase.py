@@ -12,15 +12,10 @@ class TokenBase(ABC):
         yield from cls.__subclasses__()
 
     @classmethod
-    def is_symbol(cls, ch):
-        """returns true if the given char belongs to a token type"""
-        return ch in cls.reserved()
-
-    @classmethod
     def is_reserved(cls, ch):
-        """returns true if the char is a reserved symbol"""
+        """returns true if the char is a reserved symbol among any subclasses"""
         for TokenClasses in cls.__get_subclasses():
-            if TokenClasses.is_symbol(ch):
+            if ch in TokenClasses.reserved():
                 return True
         return False
 
@@ -34,7 +29,7 @@ class TokenBase(ABC):
 
     @classmethod
     def get_token(cls, current_state, token_str):
-        """make a token given a state"""
+        """make a token instance given given a state"""
         for TokenClasses in cls.__get_subclasses():
             if current_state in TokenClasses.accepting_states():
                 return TokenClasses(token_str)
@@ -49,7 +44,7 @@ class TokenBase(ABC):
         yield '\t'
 
     @classmethod
-    def states_yield_immediate(cls):
+    def states_return_immediate(cls):
         """single char states that must be yielded immediately. i.e. op, sep"""
         yield 7  # operator
         yield 8  # separator
@@ -62,4 +57,5 @@ class TokenBase(ABC):
         yield
 
     def __str__(self):
+        """magic method for token printout to either console or a file output"""
         return "token: {:<12} lexeme: '{}'".format(self.__class__.__name__.replace("Token", ''), self.__lexeme)

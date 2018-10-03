@@ -17,7 +17,7 @@ class Main(object):
     def write_lexer(cls, args, file_ptr):
         try:
             with open(args.output, 'w') as f:
-                for t in Lexer.lexer(file_ptr):
+                for t in Lexer(file_ptr):
                     f.writelines("{}\n".format(t))
             print("Successfully wrote tokens to the file: '{}'".format(args.output))
         except Exception as ex:
@@ -27,7 +27,7 @@ class Main(object):
     @classmethod
     def print_lexer(cls, file_ptr):
         try:
-            for t in Lexer.lexer(file_ptr):
+            for t in Lexer(file_ptr):
                 print(t)
         except Exception as ex:
             print(ex)

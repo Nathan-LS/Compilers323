@@ -2,72 +2,76 @@ from . import *
 
 
 class Lexer(object):
+    def __init__(self, file_ptr):
+        self.__file_ptr = file_ptr
+        row1 = [2, 4, 7, 8, 9, 9]
+        row2 = [2, 3, 9, 9, 9, 9]
+        row3 = [2, 3, 9, 9, 9, 9]
+        row4 = [9, 4, 9, 9, 5, 9]
+        row5 = [9, 6, 9, 9, 9, 9]
+        row6 = [9, 6, 9, 9, 9, 9]
+        row7 = [9, 9, 9, 9, 9, 9]
+        row8 = [9, 9, 9, 9, 9, 9]
+        row9 = [9, 9, 9, 9, 9, 9]
+        self.__matrix = [row1, row2, row3, row4, row5, row6, row7, row8, row9]  # state table from example2.md
 
-    @classmethod
-    def lex_state_mapper(cls, ch: str, alpha_state: int, digit_state: int, operator_state: int, separator_state: int, decimal_state: int, undefined_state: int):
+    def lex_state_mapper(self, ch: str, current_state):
         """helper function for different state mappings"""
         if ch.isalpha():
-            return alpha_state
+            return self.__matrix[current_state-1][0]
         elif ch.isdigit():
-            return digit_state
-        elif TokenOperator.is_symbol(ch):
-            return operator_state
-        elif TokenSeparator.is_symbol(ch):
-            return separator_state
+            return self.__matrix[current_state-1][1]
+        elif ch in TokenOperator.reserved():
+            return self.__matrix[current_state-1][2]
+        elif ch in TokenSeparator.reserved():
+            return self.__matrix[current_state-1][3]
         elif ch == '.':
-            return decimal_state
+            return self.__matrix[current_state-1][4]
         else:
-            return undefined_state
+            return self.__matrix[current_state-1][5]
 
     @classmethod
-    def lex_recursive_generator(cls, file_ptr, current_state=1, token_str=''):
-        """yields all token instances given a file pointer"""
-        next_char: str = file_ptr.read(1)
+    def peek(cls, file_ptr):
+        prev_pos = file_ptr.tell()
+        next_peek_char = file_ptr.read(1)
+        file_ptr.seek(prev_pos)
+        return next_peek_char
+
+    def lex_recursive_generator(self, file_ptr, current_state=1, token_str=''):
+        """returns all token instances given a file pointer. Returns None when EOF"""
+        next_char: str = self.peek(file_ptr)
         if TokenBase.is_reserved(next_char):  # hit whitespace or char that signals an end of token i.e =, >, etc
             if TokenBase.is_an_accepting_state(current_state):
                 if TokenKeyword.is_reserved(token_str):  # special case check for keywords
-                    yield TokenKeyword(token_str)
+                    return TokenKeyword(token_str)
                 else:
-                    yield TokenBase.get_token(current_state, token_str)  # make the token given the token_str and current state
-                current_state = 1  # reset to starting state
-                token_str = ''
+                    return TokenBase.get_token(current_state, token_str)  # make the token given the token_str and current state
             elif current_state != 1:  # cannot yield starting state, get more chars
-                yield TokenUndefined(token_str)
-                current_state = 1
-                token_str = ''
+                return TokenUndefined(token_str)
             else:
                 pass
-        elif current_state in TokenBase.states_yield_immediate():  # if in accepting state for a single char ie op, yield immediately
-            yield TokenBase.get_token(current_state, token_str)
-            current_state = 1
-            token_str = ''
+        elif current_state in TokenBase.states_return_immediate():  # if in accepting state for a single char ie op, yield immediately
+            return TokenBase.get_token(current_state, token_str)
         else:
             pass
         if next_char == '':  # recursive base case but we must yield the previous token if any before exiting
-            return  # raise StopIteration
+            return None  # raise StopIteration in caller
+        next_char = file_ptr.read(1)
         next_state = current_state
-        if not TokenBase.is_symbol(next_char):  # skips whitespace, tabs, newline
+        if next_char not in TokenBase.reserved():  # skips whitespace, tabs, newline
             token_str += next_char
-            if current_state == 1:
-                next_state = cls.lex_state_mapper(next_char, 2, 4, 7, 8, 9, 9)
-            elif current_state == 2:
-                next_state = cls.lex_state_mapper(next_char, 2, 3, 9, 9, 9, 9)
-            elif current_state == 3:
-                next_state = cls.lex_state_mapper(next_char, 2, 3, 9, 9, 9, 9)
-            elif current_state == 4:
-                next_state = cls.lex_state_mapper(next_char, 9, 4, 9, 9, 5, 9)
-            elif current_state == 5:
-                next_state = cls.lex_state_mapper(next_char, 9, 6, 9, 9, 9, 9)
-            elif current_state == 6:
-                next_state = cls.lex_state_mapper(next_char, 9, 6, 9, 9, 9, 9)
-            elif current_state == 7:
-                next_state = cls.lex_state_mapper(next_char, 9, 9, 9, 9, 9, 9)
-            elif current_state == 8:
-                next_state = cls.lex_state_mapper(next_char, 9, 9, 9, 9, 9, 9)
-            else:  # state 9 or undefined
-                next_state = cls.lex_state_mapper(next_char, 9, 9, 9, 9, 9, 9)
-        yield from cls.lex_recursive_generator(file_ptr, next_state, token_str)
+            next_state = self.lex_state_mapper(next_char, current_state)
+        return self.lex_recursive_generator(file_ptr, next_state, token_str)
 
-    @classmethod
-    def lexer(cls, file_ptr):
-        yield from cls.lex_recursive_generator(file_ptr)
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        return self.lexer()
+
+    def lexer(self):
+        token = self.lex_recursive_generator(self.__file_ptr)
+        if token is None:
+            raise StopIteration
+        else:
+            return token
