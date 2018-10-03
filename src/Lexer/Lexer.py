@@ -15,6 +15,10 @@ class Lexer(object):
         row9 = [9, 9, 9, 9, 9, 9]
         self.__matrix = [row1, row2, row3, row4, row5, row6, row7, row8, row9]  # state table from example2.md
 
+    @property
+    def starting_state(self):
+        return 1
+
     def lex_state_mapper(self, ch: str, current_state):
         """helper function for different state mappings"""
         if ch.isalpha():
@@ -30,23 +34,22 @@ class Lexer(object):
         else:
             return self.__matrix[current_state-1][5]
 
-    @classmethod
-    def peek(cls, file_ptr):
-        prev_pos = file_ptr.tell()
-        next_peek_char = file_ptr.read(1)
-        file_ptr.seek(prev_pos)
+    def peek(self):
+        prev_pos = self.__file_ptr.tell()
+        next_peek_char = self.__file_ptr.read(1)
+        self.__file_ptr.seek(prev_pos)
         return next_peek_char
 
-    def lex_recursive_generator(self, file_ptr, current_state=1, token_str=''):
+    def lexer(self, current_state=1, token_str=''):
         """returns all token instances given a file pointer. Returns None when EOF"""
-        next_char: str = self.peek(file_ptr)
+        next_char: str = self.peek()
         if TokenBase.is_reserved(next_char):  # hit whitespace or char that signals an end of token i.e =, >, etc
             if TokenBase.is_an_accepting_state(current_state):
-                if TokenKeyword.is_reserved(token_str):  # special case check for keywords
+                if token_str in TokenKeyword.reserved():  # special case check for keywords
                     return TokenKeyword(token_str)
                 else:
                     return TokenBase.get_token(current_state, token_str)  # make the token given the token_str and current state
-            elif current_state != 1:  # cannot yield starting state, get more chars
+            elif current_state != self.starting_state:  # cannot yield starting state, get more chars
                 return TokenUndefined(token_str)
             else:
                 pass
@@ -55,13 +58,13 @@ class Lexer(object):
         else:
             pass
         if next_char == '':  # recursive base case but we must yield the previous token if any before exiting
-            return None  # raise StopIteration in caller
-        next_char = file_ptr.read(1)
+            raise StopIteration  # raise StopIteration in caller
+        next_char = self.__file_ptr.read(1)
         next_state = current_state
         if next_char not in TokenBase.reserved():  # skips whitespace, tabs, newline
             token_str += next_char
             next_state = self.lex_state_mapper(next_char, current_state)
-        return self.lex_recursive_generator(file_ptr, next_state, token_str)
+        return self.lexer(next_state, token_str)
 
     def __iter__(self):
         return self
@@ -69,9 +72,3 @@ class Lexer(object):
     def __next__(self):
         return self.lexer()
 
-    def lexer(self):
-        token = self.lex_recursive_generator(self.__file_ptr)
-        if token is None:
-            raise StopIteration
-        else:
-            return token
