@@ -44,12 +44,6 @@ class TokenBase(ABC):
         yield '\t'
 
     @classmethod
-    def states_return_immediate(cls):
-        """single char states that must be yielded immediately. i.e. op, sep"""
-        yield 7  # operator
-        yield 8  # separator
-
-    @classmethod
     @abstractmethod
     def accepting_states(cls):
         """yields integer accepting states for this particular token"""
