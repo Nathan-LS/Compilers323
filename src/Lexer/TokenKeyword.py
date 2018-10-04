@@ -3,7 +3,7 @@ from .TokenBase import TokenBase
 
 class TokenKeyword(TokenBase):
     @classmethod
-    def reserved(cls):
+    def symbols(cls):
         yield 'int'
         yield 'if'
         yield 'else'

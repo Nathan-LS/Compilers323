@@ -3,7 +3,7 @@ from .TokenBase import TokenBase
 
 class TokenIdentifier(TokenBase):
     @classmethod
-    def reserved(cls):
+    def symbols(cls):
         return
         yield
 

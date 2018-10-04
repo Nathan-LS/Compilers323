@@ -25,9 +25,9 @@ class Lexer(object):
             return self.__matrix[current_state-1][0]
         elif ch.isdigit():
             return self.__matrix[current_state-1][1]
-        elif ch in TokenOperator.reserved():
+        elif ch in TokenOperator.symbols():
             return self.__matrix[current_state-1][2]
-        elif ch in TokenSeparator.reserved():
+        elif ch in TokenSeparator.symbols():
             return self.__matrix[current_state-1][3]
         elif ch == '.':
             return self.__matrix[current_state-1][4]
@@ -41,11 +41,11 @@ class Lexer(object):
         return next_peek_char
 
     def lexer(self, current_state=1, token_str=''):
-        """returns all token instances given a file pointer. Returns None when EOF"""
+        """returns the next token"""
         next_char: str = self.peek()
-        if TokenBase.is_reserved(next_char):  # hit whitespace or char that signals an end of token i.e =, >, etc
+        if TokenBase.is_symbol(next_char):  # hit whitespace or char that signals an end of token i.e =, >, etc
             if TokenBase.is_an_accepting_state(current_state):
-                if token_str in TokenKeyword.reserved():  # special case check for keywords
+                if token_str in TokenKeyword.symbols():  # special case check for keywords
                     return TokenKeyword(token_str)
                 else:
                     return TokenBase.get_token(current_state, token_str)  # make the token given the token_str and current state
@@ -61,7 +61,7 @@ class Lexer(object):
             raise StopIteration  # raise StopIteration in caller
         next_char = self.__file_ptr.read(1)
         next_state = current_state
-        if next_char not in TokenBase.reserved():  # skips whitespace, tabs, newline
+        if next_char not in TokenBase.symbols():  # skips whitespace, tabs, newline
             token_str += next_char
             next_state = self.lex_state_mapper(next_char, current_state)
         return self.lexer(next_state, token_str)

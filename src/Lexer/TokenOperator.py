@@ -3,7 +3,7 @@ from .TokenBase import TokenBase
 
 class TokenOperator(TokenBase):
     @classmethod
-    def reserved(cls):
+    def symbols(cls):
         yield '+'
         yield '-'
         yield '='

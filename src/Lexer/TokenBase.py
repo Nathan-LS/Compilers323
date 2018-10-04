@@ -12,10 +12,10 @@ class TokenBase(ABC):
         yield from cls.__subclasses__()
 
     @classmethod
-    def is_reserved(cls, ch):
-        """returns true if the char is a reserved symbol among any subclasses"""
+    def is_symbol(cls, ch):
+        """returns true if the char is a symbols symbol among any subclasses"""
         for TokenClasses in cls.__get_subclasses():
-            if ch in TokenClasses.reserved():
+            if ch in TokenClasses.symbols():
                 return True
         return False
 
@@ -36,8 +36,8 @@ class TokenBase(ABC):
 
     @classmethod
     @abstractmethod
-    def reserved(cls):
-        """generator for reserved chars that signify new tokens"""
+    def symbols(cls):
+        """generator for symbols chars that signify new tokens"""
         yield ''
         yield ' '
         yield '\n'
