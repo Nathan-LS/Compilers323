@@ -1,6 +1,7 @@
 import argparse
 import sys
 from Lexer import Lexer
+from Preprocessor import Preprocessor
 import traceback
 
 
@@ -35,22 +36,15 @@ class Main(object):
 
     @classmethod
     def process_file(cls, args):
-        try:
-            if args.input == args.output:
-                print("Error. You cannot output the tokens into your input file.")
-                sys.exit(1)
-            with open(args.input, 'r') as f:
-                if args.output:
-                    cls.write_lexer(args, f)
-                else:
-                    cls.print_lexer(f)
-        except FileNotFoundError:
-            print("The file '{}' was not found.".format(args.input))
+        if args.input == args.output:
+            print("Error. You cannot output the tokens into your input file.")
             sys.exit(1)
-        except Exception as ex:
-            print("File error: '{}' when opening the file: '{}'".format(ex, args.input))
-            traceback.print_exc()
-            sys.exit(1)
+        else:
+            preprocessor_file = Preprocessor(args.input)
+            if args.output:
+                cls.write_lexer(args, preprocessor_file.get_file())
+            else:
+                cls.print_lexer(preprocessor_file.get_file())
 
     @classmethod
     def main(cls):
