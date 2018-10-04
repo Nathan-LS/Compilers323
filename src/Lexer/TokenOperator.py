@@ -7,8 +7,14 @@ class TokenOperator(TokenBase):
         yield '+'
         yield '-'
         yield '='
+        yield '*'
+        yield '/'
         yield '>'
         yield '<'
+        yield '^='
+        yield '<='
+        yield '>='
+        yield '=='
 
     @classmethod
     def accepting_states(cls):

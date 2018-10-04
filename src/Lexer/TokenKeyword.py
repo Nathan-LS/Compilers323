@@ -9,9 +9,11 @@ class TokenKeyword(TokenBase):
         yield 'else'
         yield 'ifend'
         yield 'while'
+        yield 'whileend'
         yield 'return'
         yield 'get'
         yield 'put'
+        yield 'function'
 
     @classmethod
     def accepting_states(cls):
