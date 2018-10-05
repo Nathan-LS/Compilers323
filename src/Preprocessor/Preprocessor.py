@@ -31,12 +31,11 @@ class Preprocessor(object):
             sys.exit(1)
 
     def __remove_comments(self):
-        for line in self.input_file:
-            yield re.sub('\[\*.*?\*\]', '', line)
+        reg = re.compile('\[\*.*?\*\]', re.DOTALL)
+        return re.sub(reg, '', self.input_file.read())
 
     def __make_preprocessor_file(self):
-        for line in self.__remove_comments():
-            self.output_file.write(line)
+        self.output_file.write(self.__remove_comments())
         self.input_file.close()
         self.output_file.close()
         self.output_file = self.__get_preprocessor_file_pointer(read_mode=True)
