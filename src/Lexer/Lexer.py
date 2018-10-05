@@ -51,6 +51,8 @@ class Lexer(object):
             elif next_str in TokenSeparator.symbols():  # if combined with next char is valid symbol for separator
                 self.__file_ptr.read(1)
                 return TokenSeparator(next_str)
+            elif current_state in TokenSeparator.accepting_states() or current_state in TokenOperator.accepting_states():
+                return TokenBase.get_token(current_state, token_str)
             else:  # the next str is invalid for op/sep special case continue moving on till next end of token symbol
                 pass
         if TokenBase.is_symbol(next_char):  # hit whitespace or char that signals an end of token i.e =, >, etc
