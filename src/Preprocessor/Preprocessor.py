@@ -24,7 +24,7 @@ class Preprocessor(object):
     def __get_preprocessor_file_pointer(self, read_mode=False):
         try:
             mode = 'r' if read_mode else 'w'
-            return open('preprocessor_{}'.format(self.input_name), mode)
+            return open('preprocessor_temp_file.txt', mode)
         except Exception as ex:
             print("File error: '{}' when opening the temp preprocessor file.".format(ex))
             traceback.print_exc()
@@ -44,6 +44,6 @@ class Preprocessor(object):
     def get_file(self):
         return self.output_file
 
-    def __del__(self):
+    def close(self):
         self.input_file.close()
         self.output_file.close()

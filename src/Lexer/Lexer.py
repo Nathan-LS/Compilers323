@@ -43,11 +43,14 @@ class Lexer(object):
     def lexer(self, current_state=1, token_str=''):
         """returns the next token"""
         next_char: str = self.peek()
-        if current_state in TokenOperator.accepting_states() or current_state in TokenSeparator.accepting_states():
+        if current_state in TokenOperator.accepting_states() or current_state in TokenSeparator.accepting_states() or current_state in TokenUndefined.accepting_states():
             next_str = token_str + next_char   # get next char and check if a double char string is a valid op or sep
-            if next_str in TokenOperator.symbols() or next_str in TokenSeparator.symbols():  # if in either
+            if next_str in TokenOperator.symbols():  # if in either
                 self.__file_ptr.read(1)  # advance file pointer and return the token
-                return TokenBase.get_token(current_state, next_str)
+                return TokenOperator(next_str)
+            elif next_str in TokenSeparator.symbols():
+                self.__file_ptr.read(1)
+                return TokenSeparator(next_str)
             else:  # the next str is invalid for op/sep special case. just return the single char token and move on
                 return TokenBase.get_token(current_state, token_str)
         elif TokenBase.is_symbol(next_char):  # hit whitespace or char that signals an end of token i.e =, >, etc

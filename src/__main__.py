@@ -45,6 +45,7 @@ class Main(object):
                 cls.write_lexer(args, preprocessor_file.get_file())
             else:
                 cls.print_lexer(preprocessor_file.get_file())
+            preprocessor_file.close()
 
     @classmethod
     def main(cls):

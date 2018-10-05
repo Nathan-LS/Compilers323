@@ -11,7 +11,6 @@ class TokenSeparator(TokenBase):
         yield '}'
         yield ';'
         yield ':'
-        yield '$'
         yield '$$'
 
     @classmethod
