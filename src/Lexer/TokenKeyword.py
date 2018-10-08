@@ -14,6 +14,10 @@ class TokenKeyword(TokenBase):
         yield 'get'
         yield 'put'
         yield 'function'
+        yield 'read'
+        yield 'boolean'
+        yield 'true'
+        yield 'false'
 
     @classmethod
     def accepting_states(cls):

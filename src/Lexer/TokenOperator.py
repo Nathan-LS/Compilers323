@@ -12,8 +12,8 @@ class TokenOperator(TokenBase):
         yield '>'
         yield '<'
         yield '^='
-        yield '<='
-        yield '>='
+        yield '=<'
+        yield '=>'
         yield '=='
 
     @classmethod
