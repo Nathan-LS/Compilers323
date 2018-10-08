@@ -1,0 +1,37 @@
+haha this is fun
+test32case 3
+3.0 is a real
+1234 is an integer
+0.05 is a real
+.05 is undefined
+
+35 > 30
+30 => 30
+30 =< (25 + 5)
+
+true == false
+True == False
+a = 123
+while (true)
+{
+	a = a + 5
+	return
+}
+whileend
+
+$$
+$$
+$$
+
+3 ^= 4
+int a, b, c;
+a = 3
+b = 4
+c = 5
+a > b
+b < c
+a >= c 
+
+int if else ifend elseend ut oh
+put get function read boolean true false
+return + =  - * /

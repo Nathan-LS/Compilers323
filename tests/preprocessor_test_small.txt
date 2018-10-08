@@ -1,0 +1,22 @@
+Hey, this is a new file
+
+unknown23 tokens1
+
+known234token
+
+3*4=12
+12 == 12
+13 ^= 14
+12 >= 10
+12 => 10
+10 <= === ===>= 100
+function
+while
+end
+whileend
+
+that is true
+True?
+3.0 + 0.05 = 3.05
+0.00 + .05 = 0.05
+Real integers are no fun.

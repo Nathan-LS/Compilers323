@@ -1,0 +1,46 @@
+[* this
+[* is
+a
+test case file.
+*]
+
+function kill123aliens123they85should059die (int number54of03AlIeNs)
+{
+	return number54of03AlIeNs - number54of03AlIeNs;
+
+}
+
+[* beginning of actual program *]
+$$
+	$$ [* oops this shouldn't be here *]
+	while (true)
+	{
+		a = 30.54;
+		b = 0.05;
+		c = 0;
+		d = 944540;
+		e = .05;
+		f = 94.;
+		g = 0000000.0000000;
+		h = 050505.0505059;
+		int ghg;
+		get(ghg);
+		false >= f
+		g > b
+		c < d
+		e == a
+		h <= g
+		p => o
+		p == k
+		g === z
+		h ===>=<=== o
+		false
+		zebra32
+		32zebras
+		32 + zebras
+	}
+	whileend
+
+[* forgot to put the end comment
+
+$$
