@@ -2,8 +2,9 @@ from abc import ABC, abstractmethod
 
 
 class TokenBase(ABC):
-    def __init__(self, lexeme):
+    def __init__(self, lexeme, line_number):
         self.__lexeme = lexeme
+        self.__line = line_number
 
     @classmethod
     def __get_subclasses(cls):
@@ -28,11 +29,11 @@ class TokenBase(ABC):
         return False
 
     @classmethod
-    def get_token(cls, current_state, token_str):
+    def get_token(cls, current_state, token_str, line_number):
         """make a token instance given given a state"""
         for TokenClasses in cls.__get_subclasses():
             if current_state in TokenClasses.accepting_states():
-                return TokenClasses(token_str)
+                return TokenClasses(token_str, line_number)
 
     @classmethod
     @abstractmethod
@@ -52,4 +53,5 @@ class TokenBase(ABC):
 
     def __str__(self):
         """magic method for token printout to either console or a file output"""
-        return "token: {:<12} lexeme: '{}'".format(self.__class__.__name__.replace("Token", ''), self.__lexeme)
+        return "token: {:<12} lexeme: {:<12} line:{}".format(self.__class__.__name__.replace("Token", ''),
+                                                             "'{}'".format(self.__lexeme), self.__line)

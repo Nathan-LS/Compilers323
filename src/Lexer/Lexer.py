@@ -14,6 +14,7 @@ class Lexer(object):
         row8 = [9, 9, 9, 9, 9, 9]
         row9 = [9, 9, 9, 9, 9, 9]
         self.__matrix = [row1, row2, row3, row4, row5, row6, row7, row8, row9]  # state table from example2.md
+        self.__line_number = 1
 
     @property
     def starting_state(self):
@@ -47,27 +48,29 @@ class Lexer(object):
             next_str = token_str + next_char   # get next char and check if a double char string is a valid op or sep
             if next_str in TokenOperator.symbols():  # if combined with next char is valid symbol for operator
                 self.__file_ptr.read(1)  # advance file pointer and return the token
-                return TokenOperator(next_str)
+                return TokenOperator(next_str, self.__line_number)
             elif next_str in TokenSeparator.symbols():  # if combined with next char is valid symbol for separator
                 self.__file_ptr.read(1)
-                return TokenSeparator(next_str)
+                return TokenSeparator(next_str, self.__line_number)
             elif current_state in TokenSeparator.accepting_states() or current_state in TokenOperator.accepting_states():
-                return TokenBase.get_token(current_state, token_str)
+                return TokenBase.get_token(current_state, token_str, self.__line_number)
             else:  # the next str is invalid for op/sep special case continue moving on till next end of token symbol
                 pass
         if TokenBase.is_symbol(next_char):  # hit whitespace or char that signals an end of token i.e =, >, etc
             if TokenBase.is_an_accepting_state(current_state):
                 if token_str in TokenKeyword.symbols():  # special case check for keywords
-                    return TokenKeyword(token_str)
+                    return TokenKeyword(token_str, self.__line_number)
                 else:
-                    return TokenBase.get_token(current_state, token_str)  # make the token given the token_str and current state
+                    return TokenBase.get_token(current_state, token_str, self.__line_number)  # make the token given the token_str and current state
             elif current_state != self.starting_state:  # cannot yield starting state, get more chars
-                return TokenUndefined(token_str)
+                return TokenUndefined(token_str, self.__line_number)
             else:
                 pass
         if next_char == '':  # recursive base case but we must yield the previous token if any before exiting
             raise StopIteration  # raise StopIteration in caller
         next_char = self.__file_ptr.read(1)
+        if next_char == '\n':
+            self.__line_number += 1
         next_state = current_state
         if next_char not in TokenBase.symbols():  # skips whitespace, tabs, newline
             token_str += next_char

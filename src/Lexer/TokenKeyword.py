@@ -14,7 +14,7 @@ class TokenKeyword(TokenBase):
         yield 'get'
         yield 'put'
         yield 'function'
-        yield 'read'
+        yield 'real'
         yield 'boolean'
         yield 'true'
         yield 'false'
