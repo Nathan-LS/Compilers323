@@ -2,7 +2,7 @@ from . import *
 
 
 class Lexer(object):
-    def __init__(self, file_ptr):
+    def __init__(self, file_ptr, filename, print_console=False):
         self.__file_ptr = file_ptr
         row1 = [2, 4, 7, 8, 9, 9]
         row2 = [2, 3, 9, 9, 9, 9]
@@ -15,6 +15,10 @@ class Lexer(object):
         row9 = [9, 9, 9, 9, 9, 9]
         self.__matrix = [row1, row2, row3, row4, row5, row6, row7, row8, row9]  # state table from example2.md
         self.__line_number = 1
+        self.__current_index = 0
+        self.__tokens = []
+        self.__filename = filename
+        self.__print = print_console
 
     @property
     def starting_state(self):
@@ -41,7 +45,7 @@ class Lexer(object):
         self.__file_ptr.seek(prev_pos)
         return next_peek_char
 
-    def lexer(self, current_state=1, token_str=''):
+    def __lexer(self, current_state=1, token_str=''):
         """returns the next token"""
         next_char: str = self.peek()
         if current_state != self.starting_state:
@@ -75,11 +79,36 @@ class Lexer(object):
         if next_char not in TokenBase.symbols():  # skips whitespace, tabs, newline
             token_str += next_char
             next_state = self.lex_state_mapper(next_char, current_state)
-        return self.lexer(next_state, token_str)
+        return self.__lexer(next_state, token_str)
+
+    def lexer(self)->TokenBase:
+        try:
+            tok = self.__tokens[self.__current_index]
+            if self.__print:
+                print(tok)
+            return tok
+        except IndexError:
+            tok = self.__lexer()
+            self.__tokens.append(tok)
+            if self.__print:
+                print(tok)
+            return tok
+        finally:
+            self.__current_index += 1
 
     def __iter__(self):
         return self
 
     def __next__(self):
         return self.lexer()
+
+    def write_tokens(self):
+        """write the tokens to the file tokens_filename.txt"""
+        fname = "tokens_{}".format(self.__filename)
+        with open(fname, 'w') as f:
+            for t in self.__tokens:
+                f.write(str(t) + '\n')
+        print("Wrote {} tokens to the file: '{}'".format(len(self.__tokens), fname))
+
+
 
