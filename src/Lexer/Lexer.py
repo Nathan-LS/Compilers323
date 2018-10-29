@@ -15,6 +15,7 @@ class Lexer(object):
         row9 = [9, 9, 9, 9, 9, 9]
         self.__matrix = [row1, row2, row3, row4, row5, row6, row7, row8, row9]  # state table from example2.md
         self.__line_number = 1
+        self.__bt_index = 0
         self.__current_index = 0
         self.__tokens = []
         self.__filename = filename
@@ -109,6 +110,18 @@ class Lexer(object):
             for t in self.__tokens:
                 f.write(str(t) + '\n')
         print("Wrote {} tokens to the file: '{}'".format(len(self.__tokens), fname))
+
+    def bt_set(self):
+        """set the back tracker to remember the current position"""
+        self.__bt_index = self.__current_index
+
+    def bt_clear(self):
+        """clear the current back tracking position"""
+        self.bt_set()
+
+    def bt_return(self):
+        """return to a previously added back track index"""
+        self.__current_index = self.__bt_index
 
 
 
