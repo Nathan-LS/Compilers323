@@ -1,4 +1,4 @@
-from . import *
+from Tokens import *
 
 
 class Lexer(object):

@@ -1,5 +1,4 @@
 import argparse
-import sys
 from Lexer import Lexer
 from Preprocessor import Preprocessor
 import traceback
