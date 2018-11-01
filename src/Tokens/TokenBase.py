@@ -57,8 +57,9 @@ class TokenBase(ABC):
         return
         yield
 
-    def type_name(self):
-        return self.__class__.__name__.replace("Token", '')
+    @classmethod
+    def type_name(cls):
+        return cls.__name__.replace("Token", '')
 
     def __str__(self):
         """magic method for token printout to either console or a file output"""
