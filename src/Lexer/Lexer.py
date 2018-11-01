@@ -1,8 +1,9 @@
 from Tokens import *
+import argparse
 
 
 class Lexer(object):
-    def __init__(self, file_ptr, filename, print_console=False):
+    def __init__(self, file_ptr, argp: argparse.ArgumentParser):
         self.__file_ptr = file_ptr
         row1 = [2, 4, 7, 8, 9, 9]
         row2 = [2, 3, 9, 9, 9, 9]
@@ -18,8 +19,8 @@ class Lexer(object):
         self.__bt_index = 0
         self.__current_index = 0
         self.__tokens = []
-        self.__filename = filename
-        self.__print = print_console
+        self.__filename = argp.input
+        self.__print = argp.tokens
 
     @property
     def starting_state(self):

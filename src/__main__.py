@@ -1,5 +1,5 @@
 import argparse
-from Lexer import Lexer
+from SyntaxAnalyzer import SyntaxAnalyzer
 from Preprocessor import Preprocessor
 import traceback
 
@@ -9,30 +9,32 @@ class Main(object):
     def get_args(cls):
         argp = argparse.ArgumentParser()
         argp.add_argument("--input", "-i", help="File input to compile and run.", type=str, required=True)
-        argp.add_argument("--tokens", "-t", help="Output the tokens from the lexer to the program console.", action="store_true", default=False)
+        argp.add_argument("--tokens", "-t", help="Output the tokens from the lexer to the program console.",
+                          action="store_true", default=False)
+        argp.add_argument("--syntax", "-s", help="Output the syntax rules from the syntax analyzer to the program "
+                                                 "console.", action="store_true", default=False)
         return argp.parse_args()
 
     @classmethod
-    def lexer_demo(cls, args, file_ptr):
+    def run(cls, args, file_ptr):
         try:
-            lex = Lexer(file_ptr, args.input, args.tokens)
-            for t in lex:
-                pass
-            lex.write_tokens()
+            sa = SyntaxAnalyzer(file_ptr, args)
+            sa.run_analyzer()
         except Exception as ex:
             print(ex)
             traceback.print_exc()
 
     @classmethod
     def process_file(cls, args):
+        """obtain the preprocessor file"""
         preprocessor_file = Preprocessor(args.input)
-        cls.lexer_demo(args, preprocessor_file.get_file())
+        cls.run(args, preprocessor_file.get_file())
         preprocessor_file.close()
 
     @classmethod
     def main(cls):
-        args = cls.get_args()
-        cls.process_file(args)
+        """entry point to application"""
+        cls.process_file(cls.get_args())
 
 
 if __name__ == "__main__":
