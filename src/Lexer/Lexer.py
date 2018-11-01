@@ -126,3 +126,8 @@ class Lexer(object):
             raise BackTrackerInvalidIndex
         else:
             self.__current_index = new_index
+
+    def finish_iterations(self):
+        """finish remaining token generation"""
+        for tok in self:
+            continue
