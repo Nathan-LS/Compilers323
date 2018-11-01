@@ -22,3 +22,11 @@ class CSyntaxError(CompilerExceptions):
         exp = self.expect if self.expect else "Unknown"
         msg = "Syntax error on line {}. Got '{}' of type {} but was expecting '{}'.".format(line_no, lexeme, t_type, exp)
         return msg
+
+
+class BackTrackerInvalidIndex(CompilerExceptions):
+    def __init__(self, token_obj=None, expect=None):
+        super().__init__(token_obj, expect)
+
+    def get_message(self):
+        return "Invalid backtracking index."

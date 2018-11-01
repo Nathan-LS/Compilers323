@@ -1,5 +1,6 @@
 from Tokens import *
 import argparse
+from CompilerExceptions import *
 
 
 class Lexer(object):
@@ -16,7 +17,6 @@ class Lexer(object):
         row9 = [9, 9, 9, 9, 9, 9]
         self.__matrix = [row1, row2, row3, row4, row5, row6, row7, row8, row9]  # state table from example2.md
         self.__line_number = 1
-        self.__bt_index = 0
         self.__current_index = 0
         self.__tokens = []
         self.__filename = argp.input
@@ -41,7 +41,7 @@ class Lexer(object):
         else:
             return self.__matrix[current_state-1][5]
 
-    def peek(self):
+    def __peek(self):
         prev_pos = self.__file_ptr.tell()
         next_peek_char = self.__file_ptr.read(1)
         self.__file_ptr.seek(prev_pos)
@@ -49,7 +49,7 @@ class Lexer(object):
 
     def __lexer(self, current_state=1, token_str=''):
         """returns the next token"""
-        next_char: str = self.peek()
+        next_char: str = self.__peek()
         if current_state != self.starting_state:
             next_str = token_str + next_char   # get next char and check if a double char string is a valid op or sep
             if next_str in TokenOperator.symbols():  # if combined with next char is valid symbol for operator
@@ -83,20 +83,25 @@ class Lexer(object):
             next_state = self.lex_state_mapper(next_char, current_state)
         return self.__lexer(next_state, token_str)
 
-    def lexer(self)->TokenBase:
+    def lexer(self, bt_index: int = None)->TokenBase:
+        if bt_index is not None:
+            self.__bt_set(bt_index)
         try:
             tok = self.__tokens[self.__current_index]
-            if self.__print:
-                print(tok)
+            self.__current_index += 1
             return tok
         except IndexError:
             tok = self.__lexer()
             self.__tokens.append(tok)
             if self.__print:
                 print(tok)
-            return tok
-        finally:
             self.__current_index += 1
+            return tok
+
+    def lexer_peek(self, bt_index: int = None):
+        tok = self.lexer(bt_index)
+        self.__current_index -= 1
+        return tok
 
     def __iter__(self):
         return self
@@ -112,17 +117,12 @@ class Lexer(object):
                 f.write(str(t) + '\n')
         print("Wrote {} tokens to the file: '{}'".format(len(self.__tokens), fname))
 
-    def bt_set(self):
-        """set the back tracker to remember the current position"""
-        self.__bt_index = self.__current_index
+    def bt_get(self):
+        """returns the position of the current token index for backtracking"""
+        return self.__current_index
 
-    def bt_clear(self):
-        """clear the current back tracking position"""
-        self.bt_set()
-
-    def bt_return(self):
-        """return to a previously added back track index"""
-        self.__current_index = self.__bt_index
-
-
-
+    def __bt_set(self, new_index: int):
+        if new_index > self.__current_index or not isinstance(new_index, int):
+            raise BackTrackerInvalidIndex
+        else:
+            self.__current_index = new_index
