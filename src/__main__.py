@@ -2,6 +2,7 @@ import argparse
 from SyntaxAnalyzer import SyntaxAnalyzer
 from Preprocessor import Preprocessor
 import traceback
+import colorama
 
 
 class Main(object):
@@ -34,6 +35,7 @@ class Main(object):
     @classmethod
     def main(cls):
         """entry point to application"""
+        colorama.init(autoreset=True)
         cls.process_file(cls.get_args())
 
 

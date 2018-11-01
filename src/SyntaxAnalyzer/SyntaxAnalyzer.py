@@ -2,6 +2,7 @@ from Tokens import *
 from CompilerExceptions import *
 import argparse
 import Lexer
+from colorama import Fore
 
 
 class SyntaxAnalyzer(object):
@@ -12,38 +13,41 @@ class SyntaxAnalyzer(object):
     def run_analyzer(self):
         try:
             self.r_Rat18F()
-            print("Syntax ok")
+            print(Fore.GREEN + "Syntax ok")
         except CSyntaxError as ex:
-            print(ex)
+            print(Fore.RED + str(ex))
         finally:  # regardless of errors finish obtaining all tokens and write them to file
             self.Lexer.finish_iterations()
             self.Lexer.write_tokens()
 
     def t_lexeme(self, val, bt_pos=None):
-        if self.Lexer.lexer_peek(bt_pos).is_lexeme(val):
-            self.Lexer.lexer(bt_pos)
-        else:
-            raise CSyntaxError(self.Lexer.lexer_peek(), str(val))
+        try:
+            if self.Lexer.lexer_peek(bt_pos).is_lexeme(val):
+                self.Lexer.lexer(bt_pos)
+            else:
+                raise CSyntaxError(self.Lexer.lexer_peek(), str(val))
+        except StopIteration:  # end of all tokens/file
+            return False
 
     def t_type(self, val, bt_pos=None):
-        if self.Lexer.lexer_peek(bt_pos).is_type(val):
-            self.Lexer.lexer(bt_pos)
-        else:
-            raise CSyntaxError(self.Lexer.lexer_peek(), val.type_name())
+        try:
+            if self.Lexer.lexer_peek(bt_pos).is_type(val):
+                self.Lexer.lexer(bt_pos)
+            else:
+                raise CSyntaxError(self.Lexer.lexer_peek(), val.type_name())
+        except StopIteration:  # end of all tokens/file
+            return False
 
     def r_Rat18F(self):
         """Rat18F -> $$ ID = ID + ID $$"""
-        try:
-            p = self.Lexer.bt_get()
-            self.t_lexeme('$$')
-            self.t_type(TokenIdentifier)
-            self.t_lexeme('=')
-            self.t_type(TokenIdentifier)
-            self.t_lexeme('+')
-            self.t_type(TokenIdentifier)
-            self.t_lexeme('$$')
-        except StopIteration:  # end of file
-            raise CSyntaxError
+        p = self.Lexer.bt_get()
+        self.t_lexeme('$$')
+        self.t_type(TokenIdentifier)
+        self.t_lexeme('=')
+        self.t_type(TokenIdentifier)
+        self.t_lexeme('+')
+        self.t_type(TokenIdentifier)
+        self.t_lexeme('$$')
 
     def r_OptFunctionDefinitions(self):
         pass
