@@ -1,4 +1,5 @@
 from Tokens import *
+from CompilerExceptions import *
 import argparse
 import Lexer
 
@@ -11,7 +12,7 @@ class SyntaxAnalyzer(object):
     def run_analyzer(self):
         try:
             while self.Lexer.__next__():
-                pass
+                continue
         except StopIteration:
             self.Lexer.write_tokens()
 

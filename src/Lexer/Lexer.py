@@ -101,7 +101,7 @@ class Lexer(object):
     def __iter__(self):
         return self
 
-    def __next__(self):
+    def __next__(self)->TokenBase:
         return self.lexer()
 
     def write_tokens(self):

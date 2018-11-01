@@ -1,0 +1,1 @@
+from .CompilerExceptions import CSyntaxError

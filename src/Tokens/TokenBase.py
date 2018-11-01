@@ -3,8 +3,14 @@ from abc import ABC, abstractmethod
 
 class TokenBase(ABC):
     def __init__(self, lexeme, line_number):
-        self.__lexeme = lexeme
-        self.__line = line_number
+        self.lexeme = lexeme
+        self.line = line_number
+
+    def is_type(self, class_type):
+        return isinstance(self, class_type)
+
+    def is_lexeme(self, lexeme_str: str):
+        return self.lexeme == lexeme_str
 
     @classmethod
     def __get_subclasses(cls):
@@ -51,7 +57,9 @@ class TokenBase(ABC):
         return
         yield
 
+    def type_name(self):
+        return self.__class__.__name__.replace("Token", '')
+
     def __str__(self):
         """magic method for token printout to either console or a file output"""
-        return "token: {:<12} lexeme: {:<12} line:{}".format(self.__class__.__name__.replace("Token", ''),
-                                                             "'{}'".format(self.__lexeme), self.__line)
+        return "token: {:<12} lexeme: {:<12} line:{}".format(self.type_name(), "'{}'".format(self.lexeme), self.line)
