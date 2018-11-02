@@ -25,9 +25,9 @@ class SyntaxAnalyzer(object):
             if self.Lexer.lexer_peek(bt_pos).is_lexeme(val):
                 self.Lexer.lexer(bt_pos)
             else:
-                raise CSyntaxError(self.Lexer.lexer_peek(), str(val))
+                raise CSyntaxError(self.Lexer.lexer_peek(), val)
         except StopIteration:  # end of all tokens/file
-            return False
+            raise CSyntaxErrorEOF(expect=val)
 
     def t_type(self, val, bt_pos=None):
         try:
@@ -36,7 +36,7 @@ class SyntaxAnalyzer(object):
             else:
                 raise CSyntaxError(self.Lexer.lexer_peek(), val.type_name())
         except StopIteration:  # end of all tokens/file
-            return False
+            raise CSyntaxErrorEOF(expect=val)
 
     def r_Rat18F(self):
         """Rat18F -> $$ ID = ID + ID $$"""

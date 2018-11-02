@@ -2,18 +2,19 @@ import Tokens
 
 
 class CompilerExceptions(Exception):
-    def __init__(self, token_obj=None, expect=None):
-        self.token: Tokens.TokenBase = token_obj
-        self.expect = expect
+    def __init__(self, message="Compiler base exception. Probably should not be raising this."):
+        self.message = message
         super().__init__(self.get_message())
 
     def get_message(self):
-        return "Compiler base exception. Probably should not be raising this."
+        return self.message
 
 
 class CSyntaxError(CompilerExceptions):
     def __init__(self, token_obj=None, expect=None):
-        super().__init__(token_obj, expect)
+        self.token = token_obj
+        self.expect = expect
+        super().__init__(self.get_message())
 
     def get_message(self):
         line_no = self.token.line if self.token else "Unknown"
@@ -24,9 +25,17 @@ class CSyntaxError(CompilerExceptions):
         return msg
 
 
-class BackTrackerInvalidIndex(CompilerExceptions):
-    def __init__(self, token_obj=None, expect=None):
-        super().__init__(token_obj, expect)
+class CSyntaxErrorEOF(CSyntaxError):
+    def __init__(self, expect=None):
+        self.expect = expect
+        super().__init__(token_obj=None, expect=self.expect)
 
+    def get_message(self):
+        exp = self.expect if self.expect else "Unknown"
+        msg = "Unexpected end of file. Expecting '{}'.".format(exp)
+        return msg
+
+
+class BackTrackerInvalidIndex(CompilerExceptions):
     def get_message(self):
         return "Invalid backtracking index."
