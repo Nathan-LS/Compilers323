@@ -543,7 +543,7 @@ class SyntaxAnalyzer(object):
             self.r_Term()
             self.r_Expression_prime()
             return
-        except CSyntaxErrorEOF as ex:
+        except CSyntaxError as ex:
             self.Lexer.bt_set(p)
             raise ex
 
