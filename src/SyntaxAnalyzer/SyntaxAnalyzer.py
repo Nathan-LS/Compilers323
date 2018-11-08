@@ -3,6 +3,7 @@ from CompilerExceptions import *
 import argparse
 import Lexer
 from colorama import Fore
+from functools import partial
 
 
 class SyntaxAnalyzer(object):
@@ -58,6 +59,22 @@ class SyntaxAnalyzer(object):
         except StopIteration:  # end of all tokens/file
             raise CSyntaxErrorEOF(expect=val)
 
+    def nt_call(self, production_str: str, *args):
+        self.print_production(production_str)
+        p = self.Lexer.bt_get()
+        ex_syntax = None
+        for prod_list in args:
+            if not isinstance(prod_list, list):
+                raise TypeError
+            try:
+                for function_ptr in prod_list:
+                    function_ptr()
+                return
+            except CSyntaxError as ex:
+                ex_syntax = ex
+                self.Lexer.bt_set(p)
+        raise ex_syntax
+
     def exception_helper(self, bt_pos: int, expect: str):
         """
         Raises an exception after reaching the end of a NT. Catches EOF files and returns the appropriate CSyntaxError
@@ -71,601 +88,252 @@ class SyntaxAnalyzer(object):
             raise CSyntaxErrorEOF(expect=expect)
 
     def r_Rat18F(self):
-        self.print_production("Rat18F -> OFD $$ ODL SL $$")
-        p = self.Lexer.bt_get()
-        try:
-            self.r_OptFunctionDefinitions()
-            self.t_lexeme('$$')
-            self.r_OptDeclarationList()
-            self.r_StatementList()
-            self.t_lexeme('$$')
-        except CSyntaxError as ex:
-            self.Lexer.bt_set(p)
-            raise ex
+        p1 = [partial(self.r_OptFunctionDefinitions),
+              partial(self.t_lexeme, '$$'),
+              partial(self.r_OptDeclarationList),
+              partial(self.r_StatementList),
+              partial(self.t_lexeme, '$$')]
+        self.nt_call("Rat18F -> OFD $$ ODL SL $$", p1)
 
     def r_OptFunctionDefinitions(self):
-        self.print_production("OptFunctionDefinition -> FunctionDefinitions | Empty")
-        p = self.Lexer.bt_get()
-        try:
-            self.r_FunctionDefinitions()
-            return
-        except CSyntaxError:
-            self.Lexer.bt_set(p)
-        try:
-            self.r_Empty()
-            return
-        except CSyntaxError:
-            self.Lexer.bt_set(p)
-        self.exception_helper(p, "OptFunctionDefinitions")
+        p1 = [partial(self.r_FunctionDefinitions)]
+        p2 = [partial(self.r_Empty)]
+        self.nt_call("OptFunctionDefinition -> FunctionDefinitions | Empty", p1, p2)
 
     def r_FunctionDefinitions(self):
-        self.print_production("FunctionDefinitions -> Function FunctionDefinitions' ")
-        p = self.Lexer.bt_get()
-        try:
-            self.r_Function()
-            self.r_FunctionDefinitions_prime()
-            return
-        except CSyntaxError:
-            self.Lexer.bt_set(p)
-        self.exception_helper(p, "FunctionDefinitions")
+        p1 = [partial(self.r_Function),
+              partial(self.r_FunctionDefinitions_prime)]
+        self.nt_call("FunctionDefinitions -> Function FunctionDefinitions' ", p1)
 
     def r_FunctionDefinitions_prime(self):
-        self.print_production("FunctionDefinitions' -> FunctionDefinitions | Empty ")
-        p = self.Lexer.bt_get()
-        try:
-            self.r_FunctionDefinitions()
-            return
-        except CSyntaxError:
-            self.Lexer.bt_set(p)
-        try:
-            self.r_Empty()
-            return
-        except CSyntaxError:
-            self.Lexer.bt_set(p)
-        self.exception_helper(p, "FunctionDefinitions_prime")
+        p1 = [partial(self.r_FunctionDefinitions)]
+        p2 = [partial(self.r_Empty)]
+        self.nt_call("FunctionDefinitions' -> FunctionDefinitions | Empty ", p1, p2)
 
     def r_Function(self):
-        self.print_production("Function -> function Identifier ( OptParameterList ) OptDeclarationList Body")
-        p = self.Lexer.bt_get()
-        try:
-            self.t_lexeme("function")
-            self.t_type(TokenIdentifier)
-            self.t_lexeme("(")
-            self.r_OptParameterList()
-            self.t_lexeme(")")
-            self.r_OptDeclarationList()
-            self.r_Body()
-            return
-        except CSyntaxError as ex:
-            self.Lexer.bt_set(p)
-            raise ex
+        p1 = [partial(self.t_lexeme, "function"),
+              partial(self.t_type, TokenIdentifier),
+              partial(self.t_lexeme, "("),
+              partial(self.r_OptParameterList),
+              partial(self.t_lexeme, ")"),
+              partial(self.r_OptDeclarationList),
+              partial(self.r_Body)]
+        self.nt_call("Function -> function Identifier ( OptParameterList ) OptDeclarationList Body", p1)
 
     def r_OptParameterList(self):
-        self.print_production("OptParameterList -> ParameterList | Empty")
-        p = self.Lexer.bt_get()
-        try:
-            self.r_ParameterList()
-            return
-        except CSyntaxError:
-            self.Lexer.bt_set(p)
-        try:
-            self.r_Empty()
-            return
-        except CSyntaxError:
-            self.Lexer.bt_set(p)
-        self.exception_helper(p, "OptParameterList")
+        p1 = [partial(self.r_ParameterList)]
+        p2 = [partial(self.r_Empty)]
+        self.nt_call("OptParameterList -> ParameterList | Empty", p1, p2)
 
     def r_ParameterList(self):
-        self.print_production("ParameterList -> Parameter ParameterList' ")
-        p = self.Lexer.bt_get()
-        try:
-            self.r_Parameter()
-            self.r_ParameterList_prime()
-            return
-        except CSyntaxError as ex:
-            self.Lexer.bt_set(p)
-            raise ex
+        p1 = [partial(self.r_Parameter),
+              partial(self.r_ParameterList_prime)]
+        self.nt_call("ParameterList -> Parameter ParameterList' ", p1)
 
     def r_ParameterList_prime(self):
-        self.print_production("ParameterList' -> , Parameter | Empty")
-        p = self.Lexer.bt_get()
-        try:
-            self.t_lexeme(",")
-            self.r_Parameter()
-            return
-        except CSyntaxError:
-            self.Lexer.bt_set(p)
-        try:
-            self.r_Empty()
-            return
-        except CSyntaxError:
-            self.Lexer.bt_set(p)
-        self.exception_helper(p, "ParameterList'")
+        p1 = [partial(self.t_lexeme, ","),
+              partial(self.r_Parameter)]
+        p2 = [partial(self.r_Empty)]
+        self.nt_call("ParameterList' -> , Parameter | Empty", p1, p2)
 
     def r_Parameter(self):
-        self.print_production("Parameter -> IDs : Qualifier")
-        p = self.Lexer.bt_get()
-        try:
-            self.r_IDs()
-            self.t_lexeme(":")
-            self.r_Qualifier()
-            return
-        except CSyntaxError as ex:
-            self.Lexer.bt_set(p)
-            raise ex
+        p1 = [partial(self.r_IDs),
+              partial(self.t_lexeme, ":"),
+              partial(self.r_Qualifier)]
+        self.nt_call("Parameter -> IDs : Qualifier", p1)
 
     def r_Qualifier(self):
-        self.print_production("Qualifier -> int | bool | real")
-        p = self.Lexer.bt_get()
-        try:
-            self.t_lexeme("int")
-            return
-        except CSyntaxError:
-            self.Lexer.bt_set(p)
-        try:
-            self.t_lexeme("bool")
-            return
-        except CSyntaxError:
-            self.Lexer.bt_set(p)
-        try:
-            self.t_lexeme("real")
-            return
-        except CSyntaxError:
-            self.Lexer.bt_set(p)
-        self.exception_helper(p, "Qualifier")
+        p1 = [partial(self.t_lexeme, "int")]
+        p2 = [partial(self.t_lexeme, "bool")]
+        p3 = [partial(self.t_lexeme, "real")]
+        self.nt_call("Qualifier -> int | bool | real", p1, p2, p3)
 
     def r_Body(self):
-        self.print_production("Body -> { StatementList }")
-        p = self.Lexer.bt_get()
-        try:
-            self.t_lexeme("{")
-            self.r_StatementList()
-            self.t_lexeme("}")
-        except CSyntaxError as ex:
-            self.Lexer.bt_set(p)
-            raise ex
+        p1 = [partial(self.t_lexeme, "{"),
+              partial(self.r_StatementList),
+              partial(self.t_lexeme, "}")]
+        self.nt_call("Body -> { StatementList }", p1)
 
     def r_OptDeclarationList(self):
-        self.print_production("OptDeclarationList -> DeclarationList | Empty")
-        p = self.Lexer.bt_get()
-        try:
-            self.r_DeclarationList()
-            return
-        except CSyntaxError:
-            self.Lexer.bt_set(p)
-        try:
-            self.r_Empty()
-            return
-        except CSyntaxError:
-            self.Lexer.bt_set(p)
-        self.exception_helper(p, "OptDeclarationList")
+        p1 = [partial(self.r_DeclarationList)]
+        p2 = [partial(self.r_Empty)]
+        self.nt_call("OptDeclarationList -> DeclarationList | Empty", p1, p2)
 
     def r_DeclarationList(self):
-        self.print_production("DeclarationList -> Declaration ; DeclarationList' ")
-        p = self.Lexer.bt_get()
-        try:
-            self.r_Declaration()
-            self.t_lexeme(";")
-            self.r_DeclarationList_prime()
-            return
-        except CSyntaxError as ex:
-            self.Lexer.bt_set(p)
-            raise ex
+        p1 = [partial(self.r_Declaration),
+              partial(self.t_lexeme, ";"),
+              partial(self.r_DeclarationList_prime)]
+        self.nt_call("DeclarationList -> Declaration ; DeclarationList' ", p1)
 
     def r_DeclarationList_prime(self):
-        self.print_production("DeclarationList' -> DeclarationList | Empty ")
-        p = self.Lexer.bt_get()
-        try:
-            self.r_DeclarationList()
-            return
-        except CSyntaxError:
-            self.Lexer.bt_set(p)
-        try:
-            self.r_Empty()
-            return
-        except CSyntaxError:
-            self.Lexer.bt_set(p)
-        self.exception_helper(p, "DeclarationList_prime")
+        p1 = [partial(self.r_DeclarationList)]
+        p2 = [partial(self.r_Empty)]
+        self.nt_call("DeclarationList' -> DeclarationList | Empty ", p1, p2)
 
     def r_Declaration(self):
-        self.print_production("Declaration -> Qualifier IDs ")
-        p = self.Lexer.bt_get()
-        try:
-            self.r_Qualifier()
-            self.r_IDs()
-            return
-        except CSyntaxError as ex:
-            self.Lexer.bt_set(p)
-            raise ex
+        p1 = [partial(self.r_Qualifier),
+              partial(self.r_IDs)]
+        self.nt_call("Declaration -> Qualifier IDs ", p1)
 
     def r_IDs(self):
-        self.print_production("IDs -> ID IDs' ")
-        p = self.Lexer.bt_get()
-        try:
-            self.t_type(TokenIdentifier)
-            self.r_IDs_prime()
-            return
-        except CSyntaxError as ex:
-            self.Lexer.bt_set(p)
-            raise ex
+        p1 = [partial(self.t_type, TokenIdentifier),
+              partial(self.r_IDs_prime)]
+        self.nt_call("IDs -> ID IDs' ", p1)
 
     def r_IDs_prime(self):
-        self.print_production("IDs' -> , IDs | Empty ")
-        p = self.Lexer.bt_get()
-        try:
-            self.t_lexeme(",")
-            self.r_IDs()
-            return
-        except CSyntaxError:
-            self.Lexer.bt_set(p)
-        try:
-            self.r_Empty()
-            return
-        except CSyntaxError:
-            self.Lexer.bt_set(p)
-        self.exception_helper(p, "IDs")
+        p1 = [partial(self.t_lexeme, ","),
+              partial(self.r_IDs)]
+        p2 = [partial(self.r_Empty)]
+        self.nt_call("IDs' -> , IDs | Empty ", p1, p2)
 
     def r_StatementList(self):
-        self.print_production("StatementList -> Statement StatementList' ")
-        p = self.Lexer.bt_get()
-        try:
-            self.r_Statement()
-            self.r_StatementList_prime()
-            return
-        except CSyntaxError as ex:
-            self.Lexer.bt_set(p)
-            raise ex
+        p1 = [partial(self.r_Statement),
+              partial(self.r_StatementList_prime)]
+        self.nt_call("StatementList -> Statement StatementList' ", p1)
 
     def r_StatementList_prime(self):
-        self.print_production("StatementList' -> StatementList | Empty ")
-        p = self.Lexer.bt_get()
-        try:
-            self.r_StatementList()
-            return
-        except CSyntaxError:
-            self.Lexer.bt_set(p)
-        try:
-            self.r_Empty()
-            return
-        except CSyntaxError:
-            self.Lexer.bt_set(p)
-        self.exception_helper(p, "StatementList_prime")
+        p1 = [partial(self.r_StatementList)]
+        p2 = [partial(self.r_Empty)]
+        self.nt_call("StatementList' -> StatementList | Empty ", p1, p2)
 
     def r_Statement(self):
-        self.print_production("Statement -> Compound | Assign | If | Return | Print | Scan | While")
-        p = self.Lexer.bt_get()
-        try:
-            self.r_Compound()
-            return
-        except CSyntaxError:
-            self.Lexer.bt_set(p)
-        try:
-            self.r_Assign()
-            return
-        except CSyntaxError:
-            self.Lexer.bt_set(p)
-        try:
-            self.r_If()
-            return
-        except CSyntaxError:
-            self.Lexer.bt_set(p)
-        try:
-            self.r_Return()
-            return
-        except CSyntaxError:
-            self.Lexer.bt_set(p)
-        try:
-            self.r_Print()
-            return
-        except CSyntaxError:
-            self.Lexer.bt_set(p)
-        try:
-            self.r_Scan()
-            return
-        except CSyntaxError:
-            self.Lexer.bt_set(p)
-        try:
-            self.r_While()
-            return
-        except CSyntaxError:
-            self.Lexer.bt_set(p)
-        self.exception_helper(p, "Statement")
+        p1 = [partial(self.r_Compound)]
+        p2 = [partial(self.r_Assign)]
+        p3 = [partial(self.r_If)]
+        p4 = [partial(self.r_Return)]
+        p5 = [partial(self.r_Print)]
+        p6 = [partial(self.r_Scan)]
+        p7 = [partial(self.r_While)]
+        self.nt_call("Statement -> Compound | Assign | If | Return | Print | Scan | While", p1, p2, p3, p4, p5, p6, p7)
 
     def r_Compound(self):
-        self.print_production("Compound -> { StatementList }")
-        p = self.Lexer.bt_get()
-        try:
-            self.t_lexeme("{")
-            self.r_StatementList()
-            self.t_lexeme("}")
-            return
-        except CSyntaxError as ex:
-            self.Lexer.bt_set(p)
-            raise ex
+        p1 = [partial(self.t_lexeme, "{"),
+              partial(self.r_StatementList),
+              partial(self.t_lexeme, "}")]
+        self.nt_call("Compound -> { StatementList }", p1)
 
     def r_Assign(self):
-        self.print_production("Assign -> ID = Expression ;")
-        p = self.Lexer.bt_get()
-        try:
-            self.t_type(TokenIdentifier)
-            self.t_lexeme("=")
-            self.r_Expression()
-            self.t_lexeme(";")
-            return
-        except CSyntaxError as ex:
-            self.Lexer.bt_set(p)
-            raise ex
+        p1 = [partial(self.t_type, TokenIdentifier),
+              partial(self.t_lexeme, "="),
+              partial(self.r_Expression),
+              partial(self.t_lexeme, ";")]
+        self.nt_call("Assign -> ID = Expression ;", p1)
 
     def r_If(self):
-        self.print_production("If -> if ( Condition ) Statement If' ")
-        p = self.Lexer.bt_get()
-        try:
-            self.t_lexeme("if")
-            self.t_lexeme("(")
-            self.r_Condition()
-            self.t_lexeme(")")
-            self.r_Statement()
-            self.r_If_prime()
-            return
-        except CSyntaxError as ex:
-            self.Lexer.bt_set(p)
-            raise ex
+        p1 = [partial(self.t_lexeme, "if"),
+              partial(self.t_lexeme, "("),
+              partial(self.r_Condition),
+              partial(self.t_lexeme, ")"),
+              partial(self.r_Statement),
+              partial(self.r_If_prime)]
+        self.nt_call("If -> if ( Condition ) Statement If' ", p1)
 
     def r_If_prime(self):
-        self.print_production("If' -> ifend | else Statement ifend ")
-        p = self.Lexer.bt_get()
-        try:
-            self.t_lexeme("ifend")
-            return
-        except CSyntaxError:
-            self.Lexer.bt_set(p)
-        try:
-            self.t_lexeme("else")
-            self.r_Statement()
-            self.t_lexeme("ifend")
-            return
-        except CSyntaxError:
-            self.Lexer.bt_set(p)
-        self.exception_helper(p, "If'")
+        p1 = [partial(self.t_lexeme, "ifend")]
+        p2 = [partial(self.t_lexeme, "else"),
+              partial(self.r_Statement),
+              partial(self.t_lexeme, "ifend")]
+        self.nt_call("If' -> ifend | else Statement ifend ", p1, p2)
 
     def r_Return(self):
-        self.print_production("Return -> return ; | return Expression ;")
-        p = self.Lexer.bt_get()
-        try:
-            self.t_lexeme("return")
-            self.t_lexeme(";")
-            return
-        except CSyntaxError:
-            self.Lexer.bt_set(p)
-        try:
-            self.t_lexeme("return")
-            self.r_Expression()
-            self.t_lexeme(";")
-            return
-        except CSyntaxError:
-            self.Lexer.bt_set(p)
-        self.exception_helper(p, "Return")
+        p1 = [partial(self.t_lexeme, "return"),
+              partial(self.t_lexeme, ";")]
+        p2 = [partial(self.t_lexeme, "return"),
+              partial(self.r_Expression),
+              partial(self.t_lexeme, ";")]
+        self.nt_call("Return -> return ; | return Expression ;", p1, p2)
 
     def r_Print(self):
-        self.print_production("Print -> put ( Expression ) ;")
-        p = self.Lexer.bt_get()
-        try:
-            self.t_lexeme("put")
-            self.t_lexeme("(")
-            self.r_Expression()
-            self.t_lexeme(")")
-            self.t_lexeme(";")
-            return
-        except CSyntaxError as ex:
-            self.Lexer.bt_set(p)
-            raise ex
+        p1 = [partial(self.t_lexeme, "put"),
+              partial(self.t_lexeme, "("),
+              partial(self.r_Expression),
+              partial(self.t_lexeme, ")"),
+              partial(self.t_lexeme, ";")]
+        self.nt_call("Print -> put ( Expression ) ;", p1)
 
     def r_Scan(self):
-        self.print_production("Scan -> get ( IDs ) ;")
-        p = self.Lexer.bt_get()
-        try:
-            self.t_lexeme("get")
-            self.t_lexeme("(")
-            self.r_IDs()
-            self.t_lexeme(")")
-            self.t_lexeme(";")
-            return
-        except CSyntaxError as ex:
-            self.Lexer.bt_set(p)
-            raise ex
+        p1 = [partial(self.t_lexeme, "get"),
+              partial(self.t_lexeme, "("),
+              partial(self.r_IDs),
+              partial(self.t_lexeme, ")"),
+              partial(self.t_lexeme, ";")]
+        self.nt_call("Scan -> get ( IDs ) ;", p1)
 
     def r_While(self):
-        self.print_production("While -> while ( Condition ) Statement whileend")
-        p = self.Lexer.bt_get()
-        try:
-            self.t_lexeme("while")
-            self.t_lexeme("(")
-            self.r_Condition()
-            self.t_lexeme(")")
-            self.r_Statement()
-            self.t_lexeme("whileend")
-            return
-        except CSyntaxError as ex:
-            self.Lexer.bt_set(p)
-            raise ex
+        p1 = [partial(self.t_lexeme, "while"),
+              partial(self.t_lexeme, "("),
+              partial(self.r_Condition),
+              partial(self.t_lexeme, ")"),
+              partial(self.r_Statement),
+              partial(self.t_lexeme, "whilend")]
+        self.nt_call("While -> while ( Condition ) Statement whileend", p1)
 
     def r_Condition(self):
-        self.print_production("Condition -> Expression Relop Expression")
-        p = self.Lexer.bt_get()
-        try:
-            self.r_Expression()
-            self.r_Relop()
-            self.r_Expression()
-            return
-        except CSyntaxError as ex:
-            self.Lexer.bt_set(p)
-            raise ex
+        p1 = [partial(self.r_Expression),
+              partial(self.r_Relop),
+              partial(self.r_Expression)]
+        self.nt_call("Condition -> Expression Relop Expression", p1)
 
     def r_Relop(self):
-        self.print_production("Relop -> == | ^= | > | < | => | =<")
-        p = self.Lexer.bt_get()
-        try:
-            self.t_lexeme("==")
-            return
-        except CSyntaxError:
-            self.Lexer.bt_set(p)
-        try:
-            self.t_lexeme("^=")
-            return
-        except CSyntaxError:
-            self.Lexer.bt_set(p)
-        try:
-            self.t_lexeme(">")
-            return
-        except CSyntaxError:
-            self.Lexer.bt_set(p)
-        try:
-            self.t_lexeme("<")
-            return
-        except CSyntaxError:
-            self.Lexer.bt_set(p)
-        try:
-            self.t_lexeme("=>")
-            return
-        except CSyntaxError:
-            self.Lexer.bt_set(p)
-        try:
-            self.t_lexeme("=<")
-            return
-        except CSyntaxError:
-            self.Lexer.bt_set(p)
-        self.exception_helper(p, "Relop")
+        p1 = [partial(self.t_lexeme, "==")]
+        p2 = [partial(self.t_lexeme, "^=")]
+        p3 = [partial(self.t_lexeme, ">")]
+        p4 = [partial(self.t_lexeme, "<")]
+        p5 = [partial(self.t_lexeme, "=>")]
+        p6 = [partial(self.t_lexeme, "=<")]
+        self.nt_call("Relop -> == | ^= | > | < | => | =<", p1, p2, p3, p4, p5, p6)
 
     def r_Expression(self):
-        self.print_production("Expression -> Term Expression' ")
-        p = self.Lexer.bt_get()
-        try:
-            self.r_Term()
-            self.r_Expression_prime()
-            return
-        except CSyntaxError as ex:
-            self.Lexer.bt_set(p)
-            raise ex
+        p1 = [partial(self.r_Term),
+              partial(self.r_Expression_prime)]
+        self.nt_call("Expression -> Term Expression' ", p1)
 
     def r_Expression_prime(self):
-        self.print_production("Expression' -> + Term Expression’ | - Term Expression’ | Empty ")
-        p = self.Lexer.bt_get()
-        try:
-            self.t_lexeme("+")
-            self.r_Term()
-            self.r_Expression_prime()
-            return
-        except CSyntaxError:
-            self.Lexer.bt_set(p)
-        try:
-            self.t_lexeme("-")
-            self.r_Term()
-            self.r_Expression_prime()
-            return
-        except CSyntaxError:
-            self.Lexer.bt_set(p)
-        try:
-            self.r_Empty()
-            return
-        except CSyntaxError:
-            self.Lexer.bt_set(p)
-        self.exception_helper(p, "Expression'")
+        p1 = [partial(self.t_lexeme, "+"),
+              partial(self.r_Term),
+              partial(self.r_Expression_prime)]
+        p2 = [partial(self.t_lexeme, "-"),
+              partial(self.r_Term),
+              partial(self.r_Expression_prime)]
+        p3 = [partial(self.r_Empty)]
+        self.nt_call("Expression' -> + Term Expression’ | - Term Expression’ | Empty ", p1, p2, p3)
 
     def r_Term(self):
-        self.print_production("Term -> Factor Term' ")
-        p = self.Lexer.bt_get()
-        try:
-            self.r_Factor()
-            self.r_Term_prime()
-            return
-        except CSyntaxError as ex:
-            self.Lexer.bt_set(p)
-            raise ex
+        p1 = [partial(self.r_Factor),
+              partial(self.r_Term_prime)]
+        self.nt_call("Term -> Factor Term' ", p1)
 
     def r_Term_prime(self):
-        self.print_production("Term' -> * Factor Term' | / Factor Term' | Empty ")
-        p = self.Lexer.bt_get()
-        try:
-            self.t_lexeme("*")
-            self.r_Factor()
-            self.r_Term_prime()
-            return
-        except CSyntaxError:
-            self.Lexer.bt_set(p)
-        try:
-            self.t_lexeme("/")
-            self.r_Factor()
-            self.r_Term_prime()
-            return
-        except CSyntaxError:
-            self.Lexer.bt_set(p)
-        try:
-            self.r_Empty()
-            return
-        except CSyntaxError:
-            self.Lexer.bt_set(p)
-        self.exception_helper(p, "Term'")
+        p1 = [partial(self.t_lexeme, "*"),
+              partial(self.r_Factor),
+              partial(self.r_Term_prime)]
+        p2 = [partial(self.t_lexeme, "/"),
+              partial(self.r_Factor),
+              partial(self.r_Term_prime)]
+        p3 = [partial(self.r_Empty)]
+        self.nt_call("Term' -> * Factor Term' | / Factor Term' | Empty ", p1, p2, p3)
 
     def r_Factor(self):
-        self.print_production("Factor -> -Primary | Primary")
-        p = self.Lexer.bt_get()
-        try:
-            self.t_lexeme("-")
-            self.r_Primary()
-            return
-        except CSyntaxError:
-            self.Lexer.bt_set(p)
-        try:
-            self.r_Primary()
-            return
-        except CSyntaxError:
-            self.Lexer.bt_set(p)
-        self.exception_helper(p, "Factor")
+        p1 = [partial(self.t_lexeme, "-"),
+              partial(self.r_Primary)]
+        p2 = [partial(self.r_Primary)]
+        self.nt_call("Factor -> -Primary | Primary", p1, p2)
 
     def r_Primary(self):
-        self.print_production("Primary -> ID | INT | ID ( IDs ) | ( Expression ) | Real | true | false")
-        p = self.Lexer.bt_get()
-        try:
-            self.t_type(TokenIdentifier)
-            return
-        except CSyntaxError:
-            self.Lexer.bt_set(p)
-        try:
-            self.t_type(TokenInteger)
-            return
-        except CSyntaxError:
-            self.Lexer.bt_set(p)
-        try:
-            self.t_type(TokenIdentifier)
-            self.t_lexeme("(")
-            self.r_IDs()
-            self.t_lexeme(")")
-            return
-        except CSyntaxError:
-            self.Lexer.bt_set(p)
-        try:
-            self.t_lexeme("(")
-            self.r_Expression()
-            self.t_lexeme(")")
-            return
-        except CSyntaxError:
-            self.Lexer.bt_set(p)
-        try:
-            self.t_type(TokenReal)
-            return
-        except CSyntaxError:
-            self.Lexer.bt_set(p)
-        try:
-            self.t_lexeme("true")
-            return
-        except CSyntaxError:
-            self.Lexer.bt_set(p)
-        try:
-            self.t_lexeme("false")
-            return
-        except CSyntaxError:
-            self.Lexer.bt_set(p)
-        self.exception_helper(p, "Primary")
+        p1 = [partial(self.t_type, TokenIdentifier)]
+        p2 = [partial(self.t_type, TokenInteger)]
+        p3 = [partial(self.t_type, TokenIdentifier),
+              partial(self.t_lexeme, "("),
+              partial(self.r_IDs),
+              partial(self.t_lexeme, ")")]
+        p4 = [partial(self.t_lexeme, "("),
+              partial(self.r_Expression),
+              partial(self.t_lexeme, ")")]
+        p5 = [partial(self.t_type, TokenReal)]
+        p6 = [partial(self.t_lexeme, "true")]
+        p7 = [partial(self.t_lexeme, "false")]
+        self.nt_call("Primary -> ID | INT | ID ( IDs ) | ( Expression ) | Real | true | false", p1, p2, p3, p4, p5,
+                     p6, p7)
 
     def r_Empty(self):
         return
