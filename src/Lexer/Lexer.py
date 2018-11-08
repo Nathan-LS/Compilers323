@@ -85,7 +85,7 @@ class Lexer(object):
 
     def lexer(self, bt_index: int = None)->TokenBase:
         if bt_index is not None:
-            self.__bt_set(bt_index)
+            self.bt_set(bt_index)
         try:
             tok = self.__tokens[self.__current_index]
             self.__current_index += 1
@@ -121,7 +121,7 @@ class Lexer(object):
         """returns the position of the current token index for backtracking"""
         return self.__current_index
 
-    def __bt_set(self, new_index: int):
+    def bt_set(self, new_index: int):
         if new_index > self.__current_index or not isinstance(new_index, int):
             raise BackTrackerInvalidIndex
         else:
