@@ -1,341 +1,415 @@
-from Tokens import *
-from CompilerExceptions import *
-import argparse
 import Lexer
-from colorama import Fore
-from functools import partial
 
 
-class SyntaxAnalyzer(object):
-    def __init__(self, file_ptr, argp: argparse.ArgumentParser):
-        self.Lexer = Lexer.Lexer(file_ptr, argp)
-        self.print_out: bool = argp.syntax
-        self.filename: str = argp.input
-        self.productions_pending_print = []
+class SyntaxAnalyzer:
+    def __init__(self, file_ptr):
+        self.file_ptr = file_ptr
+        self.Lexer = Lexer.Lexer(file_ptr)
 
     def run_analyzer(self):
+        self.r_Rat18F()
+
+#   Add private method to tokenbase "is_lexeme(self, lexeme):
+    def t_lexeme(self, lexeme):
         try:
-            self.r_Rat18F()
-            self.print_production("Syntax ok", color=Fore.GREEN)
-        except CSyntaxError as ex:
-            self.print_production(str(ex), color=Fore.RED)
-        finally:  # regardless of errors finish obtaining all tokens and write them to file
-            self.Lexer.finish_iterations()
-            self.Lexer.write_tokens()
-            self.write_productions()
+            if self.Lexer.peek_token().return_token() == lexeme:
+                return True
+            return False
+        except:
+            self.print_error(lexeme)
 
-    def write_productions(self):
-        fname = "syntax_{}".format(self.filename)
-        with open(fname, 'w') as f:
-            for sa in self.productions_pending_print:
-                f.write(str(sa) + '\n')
-        print("Wrote {} syntax analysis productions to the file: '{}'".format(len(self.productions_pending_print), fname))
-
-    def print_production(self, production_rule: str, color=""):
-        """
-        :param production_rule: A str production rule to output to console and add to pending file write buffer
-        :param color: a colorama fore color for console output. Ex. Fore.Green, Fore.Red
-        :return: None
-        """
-        if self.print_out:
-            print(color + production_rule)
-        self.productions_pending_print.append(production_rule)
-
-    def t_lexeme(self, val, bt_pos=None):
+#   change to isinstance(TokenIdentifier)
+    def t_type(self, lex_type):
         try:
-            if self.Lexer.lexer_peek(bt_pos).is_lexeme(val):
-                self.Lexer.lexer(bt_pos)
-            else:
-                raise CSyntaxError(self.Lexer.lexer_peek(), val)
-        except StopIteration:  # end of all tokens/file
-            raise CSyntaxErrorEOF(expect=val)
+            if self.Lexer.peek_token().__class__.__name__ == lex_type:
+                return True
+            return False
+        except:
+            self.print_error(lex_type)
 
-    def t_type(self, val, bt_pos=None):
+    def print_error(self, expected):
         try:
-            if self.Lexer.lexer_peek(bt_pos).is_type(val):
-                self.Lexer.lexer(bt_pos)
-            else:
-                raise CSyntaxError(self.Lexer.lexer_peek(), val.type_name())
-        except StopIteration:  # end of all tokens/file
-            raise CSyntaxErrorEOF(expect=val)
-
-    def nt_call(self, production_str: str, *args):
-        self.print_production(production_str)
-        p = self.Lexer.bt_get()
-        ex_syntax = None
-        for prod_list in args:
-            if not isinstance(prod_list, list):
-                raise TypeError
-            try:
-                for function_ptr in prod_list:
-                    function_ptr()
-                return
-            except CSyntaxError as ex:
-                ex_syntax = ex
-                self.Lexer.bt_set(p)
-        raise ex_syntax
-
-    def exception_helper(self, bt_pos: int, expect: str):
-        """
-        Raises an exception after reaching the end of a NT. Catches EOF files and returns the appropriate CSyntaxError
-        :param bt_pos: lexer error position
-        :param expect: expected str/token
-        :return: None
-        """
-        try:
-            raise CSyntaxError(self.Lexer.lexer_peek(bt_pos), expect)
-        except StopIteration:
-            raise CSyntaxErrorEOF(expect=expect)
+            print("Error occurred at line number: {}. Got \"{}\", but expected an {}".format(
+                                                                                    self.Lexer.peek_token().get_line(),
+                                                                                    self.Lexer.peek_token().return_token(),
+                                                                                    expected))
+        except:
+            print("Error occurred at end of file. Reached end of file marker, but expected {} or \"$$\"".format(expected))
+        exit(-1)
 
     def r_Rat18F(self):
-        p1 = [partial(self.r_OptFunctionDefinitions),
-              partial(self.t_lexeme, '$$'),
-              partial(self.r_OptDeclarationList),
-              partial(self.r_StatementList),
-              partial(self.t_lexeme, '$$')]
-        self.nt_call("Rat18F -> OFD $$ ODL SL $$", p1)
+        self.r_OptFunctionDefinitions()
+        if self.t_lexeme("$$"):
+            print(self.Lexer.lexer())
+            self.r_OptDeclarationList()
+            self.r_StatementList("Must have statement list")
+        else:
+            self.print_error("$$")
+        if self.t_lexeme("$$"):
+            print(self.Lexer.lexer())
+        else:
+            self.print_error("$$")
+        if self.Lexer.check_eof():
+            print("Success! There are no syntax errors here! :)")
+        else:
+            print("Error. Expected end of file marker after $$ token.")
 
     def r_OptFunctionDefinitions(self):
-        p1 = [partial(self.r_FunctionDefinitions)]
-        p2 = [partial(self.r_Empty)]
-        self.nt_call("OptFunctionDefinition -> FunctionDefinitions | Empty", p1, p2)
+        if self.r_FunctionDefinitions():
+            return
+        else:
+            self.r_Empty()
 
     def r_FunctionDefinitions(self):
-        p1 = [partial(self.r_Function),
-              partial(self.r_FunctionDefinitions_prime)]
-        self.nt_call("FunctionDefinitions -> Function FunctionDefinitions' ", p1)
+        if self.r_Function():
+            self.r_FunctionDefinitionsPrime()
+            return True
+        return False
 
-    def r_FunctionDefinitions_prime(self):
-        p1 = [partial(self.r_FunctionDefinitions)]
-        p2 = [partial(self.r_Empty)]
-        self.nt_call("FunctionDefinitions' -> FunctionDefinitions | Empty ", p1, p2)
+    def r_FunctionDefinitionsPrime(self):
+        if self.r_FunctionDefinitions():
+            pass
+        self.r_Empty()
 
     def r_Function(self):
-        p1 = [partial(self.t_lexeme, "function"),
-              partial(self.t_type, TokenIdentifier),
-              partial(self.t_lexeme, "("),
-              partial(self.r_OptParameterList),
-              partial(self.t_lexeme, ")"),
-              partial(self.r_OptDeclarationList),
-              partial(self.r_Body)]
-        self.nt_call("Function -> function Identifier ( OptParameterList ) OptDeclarationList Body", p1)
+        # print(self.Lexer.peek_token().return_token())
+        if self.t_lexeme("function"):
+            print(self.Lexer.lexer())
+            if self.t_type("TokenIdentifier"):
+                print(self.Lexer.lexer())
+                if self.t_lexeme("("):
+                    print(self.Lexer.lexer())
+                    self.r_OptParameterList()
+                    if self.t_lexeme(")"):
+                        print(self.Lexer.lexer())
+                        self.r_OptDeclarationList()
+                        self.r_Body()
+                        return True
+                    else:
+                        self.print_error("\")\"")
+                else:
+                    self.print_error("\"(\"")
+            else:
+                self.print_error("Identifier")
+        return False
 
     def r_OptParameterList(self):
-        p1 = [partial(self.r_ParameterList)]
-        p2 = [partial(self.r_Empty)]
-        self.nt_call("OptParameterList -> ParameterList | Empty", p1, p2)
+        self.r_ParameterList()
+        self.r_Empty()
 
     def r_ParameterList(self):
-        p1 = [partial(self.r_Parameter),
-              partial(self.r_ParameterList_prime)]
-        self.nt_call("ParameterList -> Parameter ParameterList' ", p1)
+        self.r_Parameter()
+        self.r_ParameterListPrime()
 
-    def r_ParameterList_prime(self):
-        p1 = [partial(self.t_lexeme, ","),
-              partial(self.r_Parameter)]
-        p2 = [partial(self.r_Empty)]
-        self.nt_call("ParameterList' -> , Parameter | Empty", p1, p2)
+    def r_ParameterListPrime(self):
+        if self.t_lexeme(","):
+            print(self.Lexer.lexer())
+            self.r_Parameter()
+        else:
+            self.r_Empty()
 
     def r_Parameter(self):
-        p1 = [partial(self.r_IDs),
-              partial(self.t_lexeme, ":"),
-              partial(self.r_Qualifier)]
-        self.nt_call("Parameter -> IDs : Qualifier", p1)
+        if self.t_type("TokenIdentifier"):
+            print(self.Lexer.lexer())
+            if self.t_lexeme(":"):
+                print(self.Lexer.lexer())
+                self.r_Qualifier()
+            else:
+                self.print_error(":")
+        else:
+            self.print_error("Identifier")
 
-    def r_Qualifier(self):
-        p1 = [partial(self.t_lexeme, "int")]
-        p2 = [partial(self.t_lexeme, "bool")]
-        p3 = [partial(self.t_lexeme, "real")]
-        self.nt_call("Qualifier -> int | bool | real", p1, p2, p3)
+    def r_Qualifier(self, flag="None"):
+        if self.t_lexeme("int") or self.t_lexeme("bool") or self.t_lexeme("real"):
+            print(self.Lexer.lexer())
+            return True
+        elif flag != "None":
+            return False
+        else:
+            self.print_error("Qualifier [int, bool, real]")
 
     def r_Body(self):
-        p1 = [partial(self.t_lexeme, "{"),
-              partial(self.r_StatementList),
-              partial(self.t_lexeme, "}")]
-        self.nt_call("Body -> { StatementList }", p1)
+        if self.t_lexeme("{"):
+            print(self.Lexer.lexer())
+            self.r_StatementList("Must Pass")
+            if self.t_lexeme("}"):
+                print(self.Lexer.lexer())
+                return
+            else:
+                self.print_error("}")
+        else:
+            self.print_error("{")
 
-    def r_OptDeclarationList(self):
-        p1 = [partial(self.r_DeclarationList)]
-        p2 = [partial(self.r_Empty)]
-        self.nt_call("OptDeclarationList -> DeclarationList | Empty", p1, p2)
+    def r_StatementList(self, flag="None"):
+        if self.r_Statement():
+            self.r_StatementListPrime()
+            return True
+        elif flag == "None":
+            return False
+        else:
+            self.print_error("appropriate Statement preceding '{' token.")
 
-    def r_DeclarationList(self):
-        p1 = [partial(self.r_Declaration),
-              partial(self.t_lexeme, ";"),
-              partial(self.r_DeclarationList_prime)]
-        self.nt_call("DeclarationList -> Declaration ; DeclarationList' ", p1)
-
-    def r_DeclarationList_prime(self):
-        p1 = [partial(self.r_DeclarationList)]
-        p2 = [partial(self.r_Empty)]
-        self.nt_call("DeclarationList' -> DeclarationList | Empty ", p1, p2)
-
-    def r_Declaration(self):
-        p1 = [partial(self.r_Qualifier),
-              partial(self.r_IDs)]
-        self.nt_call("Declaration -> Qualifier IDs ", p1)
-
-    def r_IDs(self):
-        p1 = [partial(self.t_type, TokenIdentifier),
-              partial(self.r_IDs_prime)]
-        self.nt_call("IDs -> ID IDs' ", p1)
-
-    def r_IDs_prime(self):
-        p1 = [partial(self.t_lexeme, ","),
-              partial(self.r_IDs)]
-        p2 = [partial(self.r_Empty)]
-        self.nt_call("IDs' -> , IDs | Empty ", p1, p2)
-
-    def r_StatementList(self):
-        p1 = [partial(self.r_Statement),
-              partial(self.r_StatementList_prime)]
-        self.nt_call("StatementList -> Statement StatementList' ", p1)
-
-    def r_StatementList_prime(self):
-        p1 = [partial(self.r_StatementList)]
-        p2 = [partial(self.r_Empty)]
-        self.nt_call("StatementList' -> StatementList | Empty ", p1, p2)
+    def r_StatementListPrime(self):
+        if not self.r_StatementList():
+            self.r_Empty()
 
     def r_Statement(self):
-        p1 = [partial(self.r_Compound)]
-        p2 = [partial(self.r_Assign)]
-        p3 = [partial(self.r_If)]
-        p4 = [partial(self.r_Return)]
-        p5 = [partial(self.r_Print)]
-        p6 = [partial(self.r_Scan)]
-        p7 = [partial(self.r_While)]
-        self.nt_call("Statement -> Compound | Assign | If | Return | Print | Scan | While", p1, p2, p3, p4, p5, p6, p7)
+        if self.r_Compound() or self.r_Assign() or self.r_If() or self.r_Return() or self.r_Print() or self.r_Scan() or self.r_While():
+            return True
+        return False
 
     def r_Compound(self):
-        p1 = [partial(self.t_lexeme, "{"),
-              partial(self.r_StatementList),
-              partial(self.t_lexeme, "}")]
-        self.nt_call("Compound -> { StatementList }", p1)
+        if self.t_lexeme("{"):
+            print(self.Lexer.lexer())
+            if not self.r_StatementList("Must Pass"):
+                self.print_error("appropriate Statement preceding '{' token.")
+            if self.t_lexeme("}"):
+                print(self.Lexer.lexer())
+                return True
+            else:
+                self.print_error("}")
+        else:
+            return False
 
     def r_Assign(self):
-        p1 = [partial(self.t_type, TokenIdentifier),
-              partial(self.t_lexeme, "="),
-              partial(self.r_Expression),
-              partial(self.t_lexeme, ";")]
-        self.nt_call("Assign -> ID = Expression ;", p1)
+        if self.t_type("TokenIdentifier"):
+            print(self.Lexer.lexer())
+            if self.t_lexeme("="):
+                print(self.Lexer.lexer())
+                self.r_Expression()
+                if self.t_lexeme(";"):
+                    print(self.Lexer.lexer())
+                    return True
+                else:
+                    self.print_error(";")
+            else:
+                self.print_error("=")
+        else:
+            return False
 
     def r_If(self):
-        p1 = [partial(self.t_lexeme, "if"),
-              partial(self.t_lexeme, "("),
-              partial(self.r_Condition),
-              partial(self.t_lexeme, ")"),
-              partial(self.r_Statement),
-              partial(self.r_If_prime)]
-        self.nt_call("If -> if ( Condition ) Statement If' ", p1)
+        if self.t_lexeme("if"):
+            print(self.Lexer.lexer())
+            if self.t_lexeme("("):
+                print(self.Lexer.lexer())
+                self.r_Condition()
+                if self.t_lexeme(")"):
+                    print(self.Lexer.lexer())
+                    if self.r_Statement():
+                        self.r_IfPrime()
+                        return True
+                    else:
+                        self.print_error("appropriate statement after if conditional.")
+                else:
+                    self.print_error(")")
+            else:
+                self.print_error("(")
+        else:
+            return False
 
-    def r_If_prime(self):
-        p1 = [partial(self.t_lexeme, "ifend")]
-        p2 = [partial(self.t_lexeme, "else"),
-              partial(self.r_Statement),
-              partial(self.t_lexeme, "ifend")]
-        self.nt_call("If' -> ifend | else Statement ifend ", p1, p2)
+    def r_IfPrime(self):
+        if self.t_lexeme("ifend"):
+            print(self.Lexer.lexer())
+            return
+        elif self.t_lexeme("else"):
+            print(self.Lexer.lexer())
+            if self.r_Statement():
+                if self.t_lexeme("ifend"):
+                    print(self.Lexer.lexer())
+                    return
+                else:
+                    self.print_error("ifend")
+            else:
+                self.print_error("appropriate statement after if conditional.")
+        else:
+            self.print_error("ifend or else statement.")
 
     def r_Return(self):
-        p1 = [partial(self.t_lexeme, "return"),
-              partial(self.t_lexeme, ";")]
-        p2 = [partial(self.t_lexeme, "return"),
-              partial(self.r_Expression),
-              partial(self.t_lexeme, ";")]
-        self.nt_call("Return -> return ; | return Expression ;", p1, p2)
+        if self.t_lexeme("return"):
+            print(self.Lexer.lexer())
+            self.r_ReturnPrime()
+            return True
+        return False
+
+    def r_ReturnPrime(self):
+        if self.t_lexeme(";"):
+            print(self.Lexer.lexer())
+        else:
+            self.r_Expression()
+            if self.t_lexeme(";"):
+                print(self.Lexer.lexer())
+            else:
+                self.print_error(";")
 
     def r_Print(self):
-        p1 = [partial(self.t_lexeme, "put"),
-              partial(self.t_lexeme, "("),
-              partial(self.r_Expression),
-              partial(self.t_lexeme, ")"),
-              partial(self.t_lexeme, ";")]
-        self.nt_call("Print -> put ( Expression ) ;", p1)
+        if self.t_lexeme("put"):
+            print(self.Lexer.lexer())
+            if self.t_lexeme("("):
+                print(self.Lexer.lexer())
+                self.r_Expression()
+                if self.t_lexeme(")"):
+                    print(self.Lexer.lexer())
+                    if self.t_lexeme(";"):
+                        print(self.Lexer.lexer())
+                        return True
+                    else:
+                        self.print_error(";")
+                else:
+                    self.print_error(")")
+            else:
+                self.print_error("(")
+        return False
 
     def r_Scan(self):
-        p1 = [partial(self.t_lexeme, "get"),
-              partial(self.t_lexeme, "("),
-              partial(self.r_IDs),
-              partial(self.t_lexeme, ")"),
-              partial(self.t_lexeme, ";")]
-        self.nt_call("Scan -> get ( IDs ) ;", p1)
+        if self.t_lexeme("get"):
+            print(self.Lexer.lexer())
+            if self.t_lexeme("("):
+                print(self.Lexer.lexer())
+                self.r_Identifiers()
+                if self.t_lexeme(")"):
+                    print(self.Lexer.lexer())
+                    if self.t_lexeme(";"):
+                        print(self.Lexer.lexer())
+                        return True
+                    else:
+                        self.print_error(";")
+                else:
+                    self.print_error(")")
+            else:
+                self.print_error("(")
+        return False
 
     def r_While(self):
-        p1 = [partial(self.t_lexeme, "while"),
-              partial(self.t_lexeme, "("),
-              partial(self.r_Condition),
-              partial(self.t_lexeme, ")"),
-              partial(self.r_Statement),
-              partial(self.t_lexeme, "whilend")]
-        self.nt_call("While -> while ( Condition ) Statement whileend", p1)
+        if self.t_lexeme("while"):
+            print(self.Lexer.lexer())
+            if self.t_lexeme("("):
+                print(self.Lexer.lexer())
+                self.r_Condition()
+                if self.t_lexeme(")"):
+                    print(self.Lexer.lexer())
+                    if self.r_Statement():
+                        if self.t_lexeme("whileend"):
+                            print(self.Lexer.lexer())
+                            return True
+                        else:
+                            self.print_error("whileend")
+                    else:
+                        self.print_error("appropriate statement following while loop.")
+                else:
+                    self.print_error(")")
+            else:
+                self.print_error("(")
+        return False
+
+    def r_Identifiers(self):
+        if self.t_type("TokenIdentifier"):
+            print(self.Lexer.lexer())
+            self.r_IdentifiersPrime()
+        else:
+            self.print_error("Identifier")
+
+    def r_IdentifiersPrime(self):
+        if self.t_lexeme(","):
+            print(self.Lexer.lexer())
+            self.r_Identifiers()
+        else:
+            self.r_Empty()
 
     def r_Condition(self):
-        p1 = [partial(self.r_Expression),
-              partial(self.r_Relop),
-              partial(self.r_Expression)]
-        self.nt_call("Condition -> Expression Relop Expression", p1)
+        self.r_Expression()
+        self.r_RelationalOperator()
+        self.r_Expression()
 
-    def r_Relop(self):
-        p1 = [partial(self.t_lexeme, "==")]
-        p2 = [partial(self.t_lexeme, "^=")]
-        p3 = [partial(self.t_lexeme, ">")]
-        p4 = [partial(self.t_lexeme, "<")]
-        p5 = [partial(self.t_lexeme, "=>")]
-        p6 = [partial(self.t_lexeme, "=<")]
-        self.nt_call("Relop -> == | ^= | > | < | => | =<", p1, p2, p3, p4, p5, p6)
+    def r_OptDeclarationList(self):
+        if self.r_DeclarationList():
+            return
+        else:
+            self.r_Empty()
+
+    def r_DeclarationList(self):
+        if self.r_Declarations():
+            if self.t_lexeme(";"):
+                print(self.Lexer.lexer())
+                self.r_DeclarationListPrime()
+                return True
+            else:
+                self.print_error(";")
+        return False
+
+
+    def r_DeclarationListPrime(self):
+        if self.r_DeclarationList():
+            return
+        else:
+            self.r_Empty()
+
+    def r_Declarations(self):
+        if self.r_Qualifier("Doesn't need to pass"):
+            self.r_Identifiers()
+            return True
+        else:
+            return False
+
+    def r_RelationalOperator(self):
+        if self.t_lexeme("==") or self.t_lexeme("^=") or self.t_lexeme(">") or self.t_lexeme("<") or self.t_lexeme("=>") or self.t_lexeme("=<"):
+            print(self.Lexer.lexer())
+        else:
+            self.print_error("Relational Operator")
 
     def r_Expression(self):
-        p1 = [partial(self.r_Term),
-              partial(self.r_Expression_prime)]
-        self.nt_call("Expression -> Term Expression' ", p1)
+        self.r_Term()
+        self.r_ExpressionPrime()
 
-    def r_Expression_prime(self):
-        p1 = [partial(self.t_lexeme, "+"),
-              partial(self.r_Term),
-              partial(self.r_Expression_prime)]
-        p2 = [partial(self.t_lexeme, "-"),
-              partial(self.r_Term),
-              partial(self.r_Expression_prime)]
-        p3 = [partial(self.r_Empty)]
-        self.nt_call("Expression' -> + Term Expression’ | - Term Expression’ | Empty ", p1, p2, p3)
+    def r_ExpressionPrime(self):
+        if self.t_lexeme("+") or self.t_lexeme("-"):
+            print(self.Lexer.lexer())
+            self.r_Term()
+            self.r_ExpressionPrime()
+        else:
+            self.r_Empty()
 
     def r_Term(self):
-        p1 = [partial(self.r_Factor),
-              partial(self.r_Term_prime)]
-        self.nt_call("Term -> Factor Term' ", p1)
+        self.r_Factor()
+        self.r_TermPrime()
 
-    def r_Term_prime(self):
-        p1 = [partial(self.t_lexeme, "*"),
-              partial(self.r_Factor),
-              partial(self.r_Term_prime)]
-        p2 = [partial(self.t_lexeme, "/"),
-              partial(self.r_Factor),
-              partial(self.r_Term_prime)]
-        p3 = [partial(self.r_Empty)]
-        self.nt_call("Term' -> * Factor Term' | / Factor Term' | Empty ", p1, p2, p3)
+    def r_TermPrime(self):
+        if self.t_lexeme("*") or self.t_lexeme("/"):
+            print(self.Lexer.lexer())
+            self.r_Factor()
+            self.r_TermPrime()
+        else:
+            self.r_Empty()
 
     def r_Factor(self):
-        p1 = [partial(self.t_lexeme, "-"),
-              partial(self.r_Primary)]
-        p2 = [partial(self.r_Primary)]
-        self.nt_call("Factor -> -Primary | Primary", p1, p2)
+        if self.t_lexeme("-"):
+            print(self.Lexer.lexer())
+        self.r_Primary()
 
     def r_Primary(self):
-        p1 = [partial(self.t_type, TokenIdentifier)]
-        p2 = [partial(self.t_type, TokenInteger)]
-        p3 = [partial(self.t_type, TokenIdentifier),
-              partial(self.t_lexeme, "("),
-              partial(self.r_IDs),
-              partial(self.t_lexeme, ")")]
-        p4 = [partial(self.t_lexeme, "("),
-              partial(self.r_Expression),
-              partial(self.t_lexeme, ")")]
-        p5 = [partial(self.t_type, TokenReal)]
-        p6 = [partial(self.t_lexeme, "true")]
-        p7 = [partial(self.t_lexeme, "false")]
-        self.nt_call("Primary -> ID | INT | ID ( IDs ) | ( Expression ) | Real | true | false", p1, p2, p3, p4, p5,
-                     p6, p7)
+        if self.t_type("TokenInteger") or self.t_type("TokenReal") or self.t_lexeme("true") or self.t_lexeme("false"):
+            print(self.Lexer.lexer())
+            return
+        elif self.t_type("TokenIdentifier"):
+            print(self.Lexer.lexer())
+            if self.t_lexeme("("):
+                print(self.Lexer.lexer())
+                self.r_Identifiers()
+                if self.t_lexeme(")"):
+                    print(self.Lexer.lexer())
+                else:
+                    self.print_error(")")
+            else:
+                return
+        elif self.t_lexeme("("):
+            print(self.Lexer.lexer())
+            self.r_Expression()
+            if self.t_lexeme(")"):
+                print(self.Lexer.lexer())
+                return
+            else:
+                self.print_error(")")
+        else:
+            self.print_error("acceptable Primary Expression [Identifier, Real, Integer, Bool...")
 
     def r_Empty(self):
         return
-
-

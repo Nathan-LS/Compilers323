@@ -61,6 +61,9 @@ class TokenBase(ABC):
     def type_name(cls):
         return cls.__name__.replace("Token", '')
 
+    def return_token(self):
+        return self.__lexeme
+
     def __str__(self):
         """magic method for token printout to either console or a file output"""
         return "token: {:<12} lexeme: {:<12} line:{}".format(self.type_name(), "'{}'".format(self.lexeme), self.line)
