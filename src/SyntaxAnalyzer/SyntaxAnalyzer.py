@@ -1,10 +1,14 @@
+from Tokens import *
+from CompilerExceptions import *
+import argparse
 import Lexer
+from colorama import Fore
+from functools import partial
 
 
 class SyntaxAnalyzer:
-    def __init__(self, file_ptr):
-        self.file_ptr = file_ptr
-        self.Lexer = Lexer.Lexer(file_ptr)
+    def __init__(self, file_ptr, argp):
+        self.Lexer = Lexer.Lexer(file_ptr, argp)
 
     def run_analyzer(self):
         self.r_Rat18F()
@@ -12,26 +16,26 @@ class SyntaxAnalyzer:
 #   Add private method to tokenbase "is_lexeme(self, lexeme):
     def t_lexeme(self, lexeme):
         try:
-            if self.Lexer.peek_token().return_token() == lexeme:
+            if self.Lexer.lexer_peek().is_lexeme(lexeme):
                 return True
             return False
         except:
             self.print_error(lexeme)
 
 #   change to isinstance(TokenIdentifier)
-    def t_type(self, lex_type):
+    def t_type(self, t_type):
         try:
-            if self.Lexer.peek_token().__class__.__name__ == lex_type:
+            if self.Lexer.lexer_peek().is_type(t_type):
                 return True
             return False
         except:
-            self.print_error(lex_type)
+            self.print_error(t_type)
 
     def print_error(self, expected):
         try:
             print("Error occurred at line number: {}. Got \"{}\", but expected an {}".format(
-                                                                                    self.Lexer.peek_token().get_line(),
-                                                                                    self.Lexer.peek_token().return_token(),
+                                                                                    self.Lexer.lexer_peek().line,
+                                                                                    self.Lexer.lexer_peek().lexeme,
                                                                                     expected))
         except:
             print("Error occurred at end of file. Reached end of file marker, but expected {} or \"$$\"".format(expected))
@@ -49,10 +53,11 @@ class SyntaxAnalyzer:
             print(self.Lexer.lexer())
         else:
             self.print_error("$$")
-        if self.Lexer.check_eof():
-            print("Success! There are no syntax errors here! :)")
-        else:
+        try:
+            self.Lexer.lexer_peek()
             print("Error. Expected end of file marker after $$ token.")
+        except StopIteration:  # eof
+            print("Success! There are no syntax errors here! :)")
 
     def r_OptFunctionDefinitions(self):
         if self.r_FunctionDefinitions():
@@ -75,7 +80,7 @@ class SyntaxAnalyzer:
         # print(self.Lexer.peek_token().return_token())
         if self.t_lexeme("function"):
             print(self.Lexer.lexer())
-            if self.t_type("TokenIdentifier"):
+            if self.t_type(TokenIdentifier):
                 print(self.Lexer.lexer())
                 if self.t_lexeme("("):
                     print(self.Lexer.lexer())
@@ -109,7 +114,7 @@ class SyntaxAnalyzer:
             self.r_Empty()
 
     def r_Parameter(self):
-        if self.t_type("TokenIdentifier"):
+        if self.t_type(TokenIdentifier):
             print(self.Lexer.lexer())
             if self.t_lexeme(":"):
                 print(self.Lexer.lexer())
@@ -172,7 +177,7 @@ class SyntaxAnalyzer:
             return False
 
     def r_Assign(self):
-        if self.t_type("TokenIdentifier"):
+        if self.t_type(TokenIdentifier):
             print(self.Lexer.lexer())
             if self.t_lexeme("="):
                 print(self.Lexer.lexer())
@@ -302,7 +307,7 @@ class SyntaxAnalyzer:
         return False
 
     def r_Identifiers(self):
-        if self.t_type("TokenIdentifier"):
+        if self.t_type(TokenIdentifier):
             print(self.Lexer.lexer())
             self.r_IdentifiersPrime()
         else:
@@ -386,10 +391,10 @@ class SyntaxAnalyzer:
         self.r_Primary()
 
     def r_Primary(self):
-        if self.t_type("TokenInteger") or self.t_type("TokenReal") or self.t_lexeme("true") or self.t_lexeme("false"):
+        if self.t_type(TokenInteger) or self.t_type(TokenReal) or self.t_lexeme("true") or self.t_lexeme("false"):
             print(self.Lexer.lexer())
             return
-        elif self.t_type("TokenIdentifier"):
+        elif self.t_type(TokenIdentifier):
             print(self.Lexer.lexer())
             if self.t_lexeme("("):
                 print(self.Lexer.lexer())
