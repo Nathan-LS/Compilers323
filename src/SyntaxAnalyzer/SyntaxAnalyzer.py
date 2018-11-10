@@ -8,12 +8,16 @@ from colorama import Fore
 class SyntaxAnalyzer:
     def __init__(self, file_ptr, argp):
         self.Lexer = Lexer.Lexer(file_ptr, argp)
+        self.print_flag = argp.syntax
 
     def run_analyzer(self):
         try:
             self.r_Rat18F()
         except CSyntaxError as ex:
             print(Fore.RED + str(ex))
+        finally:
+            self.Lexer.finish_iterations()
+            self.Lexer.write_tokens()
 
     def t_lexeme(self, lexeme):
         try:
