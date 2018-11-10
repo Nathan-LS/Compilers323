@@ -8,16 +8,37 @@ from colorama import Fore
 class SyntaxAnalyzer:
     def __init__(self, file_ptr, argp):
         self.Lexer = Lexer.Lexer(file_ptr, argp)
-        self.print_flag = argp.syntax
+        self.print_out: bool = argp.syntax
+        self.filename: str = argp.input
+        self.productions_pending_print = []
 
     def run_analyzer(self):
         try:
             self.r_Rat18F()
         except CSyntaxError as ex:
-            print(Fore.RED + str(ex))
+            self.print_p(str(ex), color=Fore.RED, force_console=True)
         finally:
             self.Lexer.finish_iterations()
             self.Lexer.write_tokens()
+            self.write_productions()
+
+    def write_productions(self):
+        fname = "syntax_{}".format(self.filename)
+        with open(fname, 'w') as f:
+            for sa in self.productions_pending_print:
+                f.write(str(sa) + '\n')
+        print("Wrote {} syntax analysis productions or messages to the file: '{}'".format(len(self.productions_pending_print), fname))
+
+    def print_p(self, production_rule: str, color="", force_console=False):
+        """
+        :param production_rule: A str production rule to output to console and add to pending file write buffer
+        :param color: a colorama fore color for console output. Ex. Fore.Green, Fore.Red
+        :param force_console: Force print to the console regardless of the Syntax Analyzer print to console flag being set
+        :return: None
+        """
+        if self.print_out or force_console:
+            print(color + production_rule)
+        self.productions_pending_print.append(production_rule)
 
     def t_lexeme(self, lexeme):
         try:
@@ -55,10 +76,10 @@ class SyntaxAnalyzer:
             self.raise_syntax_error("$$")
         try:
             self.Lexer.lexer_peek()
-            print(Fore.RED + "Error. Expected end of file marker after $$ token.")
+            self.print_p("Error. Expected end of file marker after $$ token.", color=Fore.RED, force_console=True)
             self.raise_syntax_error('$$')
         except StopIteration:  # eof
-            print(Fore.GREEN + "Success! There are no syntax errors here! :)")
+            self.print_p("Success! There are no syntax errors here! :)", color=Fore.GREEN, force_console=True)
 
     def r_OptFunctionDefinitions(self):
         if self.r_FunctionDefinitions():
