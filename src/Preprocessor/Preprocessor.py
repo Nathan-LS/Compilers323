@@ -32,7 +32,14 @@ class Preprocessor(object):
 
     def __remove_comments(self):
         reg = re.compile('\[\*.*?\*\]', re.DOTALL)
-        return re.sub(reg, '', self.input_file.read())
+        raw_file = self.input_file.read()
+        new_str = raw_file
+        for subs in re.findall(reg, raw_file):
+            replace_string = ""
+            for new_l in range(1, len(subs.splitlines())):
+                replace_string += '\n'
+            new_str = new_str.replace(subs, replace_string)
+        return new_str
 
     def __make_preprocessor_file(self):
         self.output_file.write(self.__remove_comments())

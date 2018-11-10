@@ -1,0 +1,20 @@
+function printtest (a : int)
+{
+
+    put(a);
+    put( (a+ b +c / (c + a)) + f);
+    get(a);
+    return a;
+}
+$$
+while( a => 5){
+    if ( a ^= 5){
+        put(a);
+    }
+    else{
+        a = 5;
+        put(a + 5 + (10/5) - 2);
+    }ifend
+
+}whileend
+$$

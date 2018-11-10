@@ -3,61 +3,83 @@ from CompilerExceptions import *
 import argparse
 import Lexer
 from colorama import Fore
-from functools import partial
 
 
 class SyntaxAnalyzer:
     def __init__(self, file_ptr, argp):
         self.Lexer = Lexer.Lexer(file_ptr, argp)
+        self.print_out: bool = argp.syntax
+        self.filename: str = argp.input
+        self.productions_pending_print = []
 
     def run_analyzer(self):
-        self.r_Rat18F()
+        try:
+            self.r_Rat18F()
+        except CSyntaxError as ex:
+            self.print_p(str(ex), color=Fore.RED, force_console=True)
+        finally:
+            self.Lexer.finish_iterations()
+            self.Lexer.write_tokens()
+            self.write_productions()
 
-#   Add private method to tokenbase "is_lexeme(self, lexeme):
+    def write_productions(self):
+        fname = "syntax_{}".format(self.filename)
+        with open(fname, 'w') as f:
+            for sa in self.productions_pending_print:
+                f.write(str(sa) + '\n')
+        print("Wrote {} syntax analysis productions or messages to the file: '{}'".format(len(self.productions_pending_print), fname))
+
+    def print_p(self, production_rule: str, color="", force_console=False):
+        """
+        :param production_rule: A str production rule to output to console and add to pending file write buffer
+        :param color: a colorama fore color for console output. Ex. Fore.Green, Fore.Red
+        :param force_console: Force print to the console regardless of the Syntax Analyzer print to console flag being set
+        :return: None
+        """
+        if self.print_out or force_console:
+            print(color + production_rule)
+        self.productions_pending_print.append(production_rule)
+
     def t_lexeme(self, lexeme):
         try:
             if self.Lexer.lexer_peek().is_lexeme(lexeme):
                 return True
             return False
-        except:
-            self.print_error(lexeme)
+        except StopIteration:
+            self.raise_syntax_error(lexeme)
 
-#   change to isinstance(TokenIdentifier)
     def t_type(self, t_type):
         try:
             if self.Lexer.lexer_peek().is_type(t_type):
                 return True
             return False
-        except:
-            self.print_error(t_type)
+        except StopIteration:
+            self.raise_syntax_error(t_type.type_name())
 
-    def print_error(self, expected):
+    def raise_syntax_error(self, expected):
         try:
-            print("Error occurred at line number: {}. Got \"{}\", but expected an {}".format(
-                                                                                    self.Lexer.lexer_peek().line,
-                                                                                    self.Lexer.lexer_peek().lexeme,
-                                                                                    expected))
-        except:
-            print("Error occurred at end of file. Reached end of file marker, but expected {} or \"$$\"".format(expected))
-        exit(-1)
+            raise CSyntaxError(self.Lexer.lexer_peek(), expected)
+        except StopIteration:
+            raise CSyntaxErrorEOF(expected)
 
     def r_Rat18F(self):
         self.r_OptFunctionDefinitions()
         if self.t_lexeme("$$"):
-            print(self.Lexer.lexer())
+            self.Lexer.lexer()
             self.r_OptDeclarationList()
             self.r_StatementList("Must have statement list")
         else:
-            self.print_error("$$")
+            self.raise_syntax_error("$$")
         if self.t_lexeme("$$"):
-            print(self.Lexer.lexer())
+            self.Lexer.lexer()
         else:
-            self.print_error("$$")
+            self.raise_syntax_error("$$")
         try:
             self.Lexer.lexer_peek()
-            print("Error. Expected end of file marker after $$ token.")
+            self.print_p("Error. Expected end of file marker after $$ token.", color=Fore.RED, force_console=True)
+            self.raise_syntax_error('$$')
         except StopIteration:  # eof
-            print("Success! There are no syntax errors here! :)")
+            self.print_p("Success! There are no syntax errors here! :)", color=Fore.GREEN, force_console=True)
 
     def r_OptFunctionDefinitions(self):
         if self.r_FunctionDefinitions():
@@ -79,23 +101,23 @@ class SyntaxAnalyzer:
     def r_Function(self):
         # print(self.Lexer.peek_token().return_token())
         if self.t_lexeme("function"):
-            print(self.Lexer.lexer())
+            self.Lexer.lexer()
             if self.t_type(TokenIdentifier):
-                print(self.Lexer.lexer())
+                self.Lexer.lexer()
                 if self.t_lexeme("("):
-                    print(self.Lexer.lexer())
+                    self.Lexer.lexer()
                     self.r_OptParameterList()
                     if self.t_lexeme(")"):
-                        print(self.Lexer.lexer())
+                        self.Lexer.lexer()
                         self.r_OptDeclarationList()
                         self.r_Body()
                         return True
                     else:
-                        self.print_error("\")\"")
+                        self.raise_syntax_error("\")\"")
                 else:
-                    self.print_error("\"(\"")
+                    self.raise_syntax_error("\"(\"")
             else:
-                self.print_error("Identifier")
+                self.raise_syntax_error("Identifier")
         return False
 
     def r_OptParameterList(self):
@@ -108,42 +130,42 @@ class SyntaxAnalyzer:
 
     def r_ParameterListPrime(self):
         if self.t_lexeme(","):
-            print(self.Lexer.lexer())
+            self.Lexer.lexer()
             self.r_Parameter()
         else:
             self.r_Empty()
 
     def r_Parameter(self):
         if self.t_type(TokenIdentifier):
-            print(self.Lexer.lexer())
+            self.Lexer.lexer()
             if self.t_lexeme(":"):
-                print(self.Lexer.lexer())
+                self.Lexer.lexer()
                 self.r_Qualifier()
             else:
-                self.print_error(":")
+                self.raise_syntax_error(":")
         else:
-            self.print_error("Identifier")
+            self.raise_syntax_error("Identifier")
 
     def r_Qualifier(self, flag="None"):
         if self.t_lexeme("int") or self.t_lexeme("bool") or self.t_lexeme("real"):
-            print(self.Lexer.lexer())
+            self.Lexer.lexer()
             return True
         elif flag != "None":
             return False
         else:
-            self.print_error("Qualifier [int, bool, real]")
+            self.raise_syntax_error("Qualifier [int, bool, real]")
 
     def r_Body(self):
         if self.t_lexeme("{"):
-            print(self.Lexer.lexer())
+            self.Lexer.lexer()
             self.r_StatementList("Must Pass")
             if self.t_lexeme("}"):
-                print(self.Lexer.lexer())
+                self.Lexer.lexer()
                 return
             else:
-                self.print_error("}")
+                self.raise_syntax_error("}")
         else:
-            self.print_error("{")
+            self.raise_syntax_error("{")
 
     def r_StatementList(self, flag="None"):
         if self.r_Statement():
@@ -152,7 +174,7 @@ class SyntaxAnalyzer:
         elif flag == "None":
             return False
         else:
-            self.print_error("appropriate Statement preceding '{' token.")
+            self.raise_syntax_error("appropriate Statement preceding '{' token.")
 
     def r_StatementListPrime(self):
         if not self.r_StatementList():
@@ -165,157 +187,157 @@ class SyntaxAnalyzer:
 
     def r_Compound(self):
         if self.t_lexeme("{"):
-            print(self.Lexer.lexer())
+            self.Lexer.lexer()
             if not self.r_StatementList("Must Pass"):
-                self.print_error("appropriate Statement preceding '{' token.")
+                self.raise_syntax_error("appropriate Statement preceding '{' token.")
             if self.t_lexeme("}"):
-                print(self.Lexer.lexer())
+                self.Lexer.lexer()
                 return True
             else:
-                self.print_error("}")
+                self.raise_syntax_error("}")
         else:
             return False
 
     def r_Assign(self):
         if self.t_type(TokenIdentifier):
-            print(self.Lexer.lexer())
+            self.Lexer.lexer()
             if self.t_lexeme("="):
-                print(self.Lexer.lexer())
+                self.Lexer.lexer()
                 self.r_Expression()
                 if self.t_lexeme(";"):
-                    print(self.Lexer.lexer())
+                    self.Lexer.lexer()
                     return True
                 else:
-                    self.print_error(";")
+                    self.raise_syntax_error(";")
             else:
-                self.print_error("=")
+                self.raise_syntax_error("=")
         else:
             return False
 
     def r_If(self):
         if self.t_lexeme("if"):
-            print(self.Lexer.lexer())
+            self.Lexer.lexer()
             if self.t_lexeme("("):
-                print(self.Lexer.lexer())
+                self.Lexer.lexer()
                 self.r_Condition()
                 if self.t_lexeme(")"):
-                    print(self.Lexer.lexer())
+                    self.Lexer.lexer()
                     if self.r_Statement():
                         self.r_IfPrime()
                         return True
                     else:
-                        self.print_error("appropriate statement after if conditional.")
+                        self.raise_syntax_error("appropriate statement after if conditional.")
                 else:
-                    self.print_error(")")
+                    self.raise_syntax_error(")")
             else:
-                self.print_error("(")
+                self.raise_syntax_error("(")
         else:
             return False
 
     def r_IfPrime(self):
         if self.t_lexeme("ifend"):
-            print(self.Lexer.lexer())
+            self.Lexer.lexer()
             return
         elif self.t_lexeme("else"):
-            print(self.Lexer.lexer())
+            self.Lexer.lexer()
             if self.r_Statement():
                 if self.t_lexeme("ifend"):
-                    print(self.Lexer.lexer())
+                    self.Lexer.lexer()
                     return
                 else:
-                    self.print_error("ifend")
+                    self.raise_syntax_error("ifend")
             else:
-                self.print_error("appropriate statement after if conditional.")
+                self.raise_syntax_error("appropriate statement after if conditional.")
         else:
-            self.print_error("ifend or else statement.")
+            self.raise_syntax_error("ifend or else statement.")
 
     def r_Return(self):
         if self.t_lexeme("return"):
-            print(self.Lexer.lexer())
+            self.Lexer.lexer()
             self.r_ReturnPrime()
             return True
         return False
 
     def r_ReturnPrime(self):
         if self.t_lexeme(";"):
-            print(self.Lexer.lexer())
+            self.Lexer.lexer()
         else:
             self.r_Expression()
             if self.t_lexeme(";"):
-                print(self.Lexer.lexer())
+                self.Lexer.lexer()
             else:
-                self.print_error(";")
+                self.raise_syntax_error(";")
 
     def r_Print(self):
         if self.t_lexeme("put"):
-            print(self.Lexer.lexer())
+            self.Lexer.lexer()
             if self.t_lexeme("("):
-                print(self.Lexer.lexer())
+                self.Lexer.lexer()
                 self.r_Expression()
                 if self.t_lexeme(")"):
-                    print(self.Lexer.lexer())
+                    self.Lexer.lexer()
                     if self.t_lexeme(";"):
-                        print(self.Lexer.lexer())
+                        self.Lexer.lexer()
                         return True
                     else:
-                        self.print_error(";")
+                        self.raise_syntax_error(";")
                 else:
-                    self.print_error(")")
+                    self.raise_syntax_error(")")
             else:
-                self.print_error("(")
+                self.raise_syntax_error("(")
         return False
 
     def r_Scan(self):
         if self.t_lexeme("get"):
-            print(self.Lexer.lexer())
+            self.Lexer.lexer()
             if self.t_lexeme("("):
-                print(self.Lexer.lexer())
+                self.Lexer.lexer()
                 self.r_Identifiers()
                 if self.t_lexeme(")"):
-                    print(self.Lexer.lexer())
+                    self.Lexer.lexer()
                     if self.t_lexeme(";"):
-                        print(self.Lexer.lexer())
+                        self.Lexer.lexer()
                         return True
                     else:
-                        self.print_error(";")
+                        self.raise_syntax_error(";")
                 else:
-                    self.print_error(")")
+                    self.raise_syntax_error(")")
             else:
-                self.print_error("(")
+                self.raise_syntax_error("(")
         return False
 
     def r_While(self):
         if self.t_lexeme("while"):
-            print(self.Lexer.lexer())
+            self.Lexer.lexer()
             if self.t_lexeme("("):
-                print(self.Lexer.lexer())
+                self.Lexer.lexer()
                 self.r_Condition()
                 if self.t_lexeme(")"):
-                    print(self.Lexer.lexer())
+                    self.Lexer.lexer()
                     if self.r_Statement():
                         if self.t_lexeme("whileend"):
-                            print(self.Lexer.lexer())
+                            self.Lexer.lexer()
                             return True
                         else:
-                            self.print_error("whileend")
+                            self.raise_syntax_error("whileend")
                     else:
-                        self.print_error("appropriate statement following while loop.")
+                        self.raise_syntax_error("appropriate statement following while loop.")
                 else:
-                    self.print_error(")")
+                    self.raise_syntax_error(")")
             else:
-                self.print_error("(")
+                self.raise_syntax_error("(")
         return False
 
     def r_Identifiers(self):
         if self.t_type(TokenIdentifier):
-            print(self.Lexer.lexer())
+            self.Lexer.lexer()
             self.r_IdentifiersPrime()
         else:
-            self.print_error("Identifier")
+            self.raise_syntax_error("Identifier")
 
     def r_IdentifiersPrime(self):
         if self.t_lexeme(","):
-            print(self.Lexer.lexer())
+            self.Lexer.lexer()
             self.r_Identifiers()
         else:
             self.r_Empty()
@@ -334,11 +356,11 @@ class SyntaxAnalyzer:
     def r_DeclarationList(self):
         if self.r_Declarations():
             if self.t_lexeme(";"):
-                print(self.Lexer.lexer())
+                self.Lexer.lexer()
                 self.r_DeclarationListPrime()
                 return True
             else:
-                self.print_error(";")
+                self.raise_syntax_error(";")
         return False
 
 
@@ -357,9 +379,9 @@ class SyntaxAnalyzer:
 
     def r_RelationalOperator(self):
         if self.t_lexeme("==") or self.t_lexeme("^=") or self.t_lexeme(">") or self.t_lexeme("<") or self.t_lexeme("=>") or self.t_lexeme("=<"):
-            print(self.Lexer.lexer())
+            self.Lexer.lexer()
         else:
-            self.print_error("Relational Operator")
+            self.raise_syntax_error("Relational Operator")
 
     def r_Expression(self):
         self.r_Term()
@@ -367,7 +389,7 @@ class SyntaxAnalyzer:
 
     def r_ExpressionPrime(self):
         if self.t_lexeme("+") or self.t_lexeme("-"):
-            print(self.Lexer.lexer())
+            self.Lexer.lexer()
             self.r_Term()
             self.r_ExpressionPrime()
         else:
@@ -379,7 +401,7 @@ class SyntaxAnalyzer:
 
     def r_TermPrime(self):
         if self.t_lexeme("*") or self.t_lexeme("/"):
-            print(self.Lexer.lexer())
+            self.Lexer.lexer()
             self.r_Factor()
             self.r_TermPrime()
         else:
@@ -387,34 +409,34 @@ class SyntaxAnalyzer:
 
     def r_Factor(self):
         if self.t_lexeme("-"):
-            print(self.Lexer.lexer())
+            self.Lexer.lexer()
         self.r_Primary()
 
     def r_Primary(self):
         if self.t_type(TokenInteger) or self.t_type(TokenReal) or self.t_lexeme("true") or self.t_lexeme("false"):
-            print(self.Lexer.lexer())
+            self.Lexer.lexer()
             return
         elif self.t_type(TokenIdentifier):
-            print(self.Lexer.lexer())
+            self.Lexer.lexer()
             if self.t_lexeme("("):
-                print(self.Lexer.lexer())
+                self.Lexer.lexer()
                 self.r_Identifiers()
                 if self.t_lexeme(")"):
-                    print(self.Lexer.lexer())
+                    self.Lexer.lexer()
                 else:
-                    self.print_error(")")
+                    self.raise_syntax_error(")")
             else:
                 return
         elif self.t_lexeme("("):
-            print(self.Lexer.lexer())
+            self.Lexer.lexer()
             self.r_Expression()
             if self.t_lexeme(")"):
-                print(self.Lexer.lexer())
+                self.Lexer.lexer()
                 return
             else:
-                self.print_error(")")
+                self.raise_syntax_error(")")
         else:
-            self.print_error("acceptable Primary Expression [Identifier, Real, Integer, Bool...")
+            self.raise_syntax_error("acceptable Primary Expression [Identifier, Real, Integer, Bool...")
 
     def r_Empty(self):
         return
