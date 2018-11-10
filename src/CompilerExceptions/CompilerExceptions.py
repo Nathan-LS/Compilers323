@@ -21,7 +21,7 @@ class CSyntaxError(CompilerExceptions):
         lexeme = self.token.lexeme if self.token else "Unknown Lexeme"
         t_type = self.token.type_name() if self.token else "Unknown token type"
         exp = self.expect if self.expect else "Unknown"
-        msg = "Error occurred at line number: {}. Got '{}', but expected an '{}'".format(line_no, lexeme, exp)
+        msg = "Error occurred at line number: {}. Got '{}', but expected an '{}'.".format(line_no, lexeme, exp)
         return msg
 
 
@@ -32,7 +32,7 @@ class CSyntaxErrorEOF(CSyntaxError):
 
     def get_message(self):
         exp = self.expect if self.expect else "Unknown"
-        msg = "Error occurred at end of file. Reached end of file marker, but expected '{}' or '$$'".format(exp)
+        msg = "Error occurred at end of file. Reached end of file marker, but expected '{}' or '$$'.".format(exp)
         return msg
 
 
