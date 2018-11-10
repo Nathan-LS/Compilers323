@@ -3,7 +3,6 @@ from CompilerExceptions import *
 import argparse
 import Lexer
 from colorama import Fore
-from functools import partial
 
 
 class SyntaxAnalyzer:
@@ -11,7 +10,10 @@ class SyntaxAnalyzer:
         self.Lexer = Lexer.Lexer(file_ptr, argp)
 
     def run_analyzer(self):
-        self.r_Rat18F()
+        try:
+            self.r_Rat18F()
+        except CSyntaxError as ex:
+            print(Fore.RED + str(ex))
 
     def t_lexeme(self, lexeme):
         try:
@@ -19,7 +21,7 @@ class SyntaxAnalyzer:
                 return True
             return False
         except StopIteration:
-            self.print_error(lexeme)
+            self.raise_syntax_error(lexeme)
 
     def t_type(self, t_type):
         try:
@@ -27,17 +29,13 @@ class SyntaxAnalyzer:
                 return True
             return False
         except StopIteration:
-            self.print_error(t_type)
+            self.raise_syntax_error(t_type.type_name())
 
-    def print_error(self, expected):
+    def raise_syntax_error(self, expected):
         try:
-            print("Error occurred at line number: {}. Got \"{}\", but expected an {}".format(
-                                                                                    self.Lexer.lexer_peek().line,
-                                                                                    self.Lexer.lexer_peek().lexeme,
-                                                                                    expected))
+            raise CSyntaxError(self.Lexer.lexer_peek(), expected)
         except StopIteration:
-            print("Error occurred at end of file. Reached end of file marker, but expected {} or \"$$\"".format(expected))
-        exit(-1)
+            raise CSyntaxErrorEOF(expected)
 
     def r_Rat18F(self):
         self.r_OptFunctionDefinitions()
@@ -46,16 +44,17 @@ class SyntaxAnalyzer:
             self.r_OptDeclarationList()
             self.r_StatementList("Must have statement list")
         else:
-            self.print_error("$$")
+            self.raise_syntax_error("$$")
         if self.t_lexeme("$$"):
             self.Lexer.lexer()
         else:
-            self.print_error("$$")
+            self.raise_syntax_error("$$")
         try:
             self.Lexer.lexer_peek()
-            print("Error. Expected end of file marker after $$ token.")
+            print(Fore.RED + "Error. Expected end of file marker after $$ token.")
+            self.raise_syntax_error('$$')
         except StopIteration:  # eof
-            print("Success! There are no syntax errors here! :)")
+            print(Fore.GREEN + "Success! There are no syntax errors here! :)")
 
     def r_OptFunctionDefinitions(self):
         if self.r_FunctionDefinitions():
@@ -89,11 +88,11 @@ class SyntaxAnalyzer:
                         self.r_Body()
                         return True
                     else:
-                        self.print_error("\")\"")
+                        self.raise_syntax_error("\")\"")
                 else:
-                    self.print_error("\"(\"")
+                    self.raise_syntax_error("\"(\"")
             else:
-                self.print_error("Identifier")
+                self.raise_syntax_error("Identifier")
         return False
 
     def r_OptParameterList(self):
@@ -118,9 +117,9 @@ class SyntaxAnalyzer:
                 self.Lexer.lexer()
                 self.r_Qualifier()
             else:
-                self.print_error(":")
+                self.raise_syntax_error(":")
         else:
-            self.print_error("Identifier")
+            self.raise_syntax_error("Identifier")
 
     def r_Qualifier(self, flag="None"):
         if self.t_lexeme("int") or self.t_lexeme("bool") or self.t_lexeme("real"):
@@ -129,7 +128,7 @@ class SyntaxAnalyzer:
         elif flag != "None":
             return False
         else:
-            self.print_error("Qualifier [int, bool, real]")
+            self.raise_syntax_error("Qualifier [int, bool, real]")
 
     def r_Body(self):
         if self.t_lexeme("{"):
@@ -139,9 +138,9 @@ class SyntaxAnalyzer:
                 self.Lexer.lexer()
                 return
             else:
-                self.print_error("}")
+                self.raise_syntax_error("}")
         else:
-            self.print_error("{")
+            self.raise_syntax_error("{")
 
     def r_StatementList(self, flag="None"):
         if self.r_Statement():
@@ -150,7 +149,7 @@ class SyntaxAnalyzer:
         elif flag == "None":
             return False
         else:
-            self.print_error("appropriate Statement preceding '{' token.")
+            self.raise_syntax_error("appropriate Statement preceding '{' token.")
 
     def r_StatementListPrime(self):
         if not self.r_StatementList():
@@ -165,12 +164,12 @@ class SyntaxAnalyzer:
         if self.t_lexeme("{"):
             self.Lexer.lexer()
             if not self.r_StatementList("Must Pass"):
-                self.print_error("appropriate Statement preceding '{' token.")
+                self.raise_syntax_error("appropriate Statement preceding '{' token.")
             if self.t_lexeme("}"):
                 self.Lexer.lexer()
                 return True
             else:
-                self.print_error("}")
+                self.raise_syntax_error("}")
         else:
             return False
 
@@ -184,9 +183,9 @@ class SyntaxAnalyzer:
                     self.Lexer.lexer()
                     return True
                 else:
-                    self.print_error(";")
+                    self.raise_syntax_error(";")
             else:
-                self.print_error("=")
+                self.raise_syntax_error("=")
         else:
             return False
 
@@ -202,11 +201,11 @@ class SyntaxAnalyzer:
                         self.r_IfPrime()
                         return True
                     else:
-                        self.print_error("appropriate statement after if conditional.")
+                        self.raise_syntax_error("appropriate statement after if conditional.")
                 else:
-                    self.print_error(")")
+                    self.raise_syntax_error(")")
             else:
-                self.print_error("(")
+                self.raise_syntax_error("(")
         else:
             return False
 
@@ -221,11 +220,11 @@ class SyntaxAnalyzer:
                     self.Lexer.lexer()
                     return
                 else:
-                    self.print_error("ifend")
+                    self.raise_syntax_error("ifend")
             else:
-                self.print_error("appropriate statement after if conditional.")
+                self.raise_syntax_error("appropriate statement after if conditional.")
         else:
-            self.print_error("ifend or else statement.")
+            self.raise_syntax_error("ifend or else statement.")
 
     def r_Return(self):
         if self.t_lexeme("return"):
@@ -242,7 +241,7 @@ class SyntaxAnalyzer:
             if self.t_lexeme(";"):
                 self.Lexer.lexer()
             else:
-                self.print_error(";")
+                self.raise_syntax_error(";")
 
     def r_Print(self):
         if self.t_lexeme("put"):
@@ -256,11 +255,11 @@ class SyntaxAnalyzer:
                         self.Lexer.lexer()
                         return True
                     else:
-                        self.print_error(";")
+                        self.raise_syntax_error(";")
                 else:
-                    self.print_error(")")
+                    self.raise_syntax_error(")")
             else:
-                self.print_error("(")
+                self.raise_syntax_error("(")
         return False
 
     def r_Scan(self):
@@ -275,11 +274,11 @@ class SyntaxAnalyzer:
                         self.Lexer.lexer()
                         return True
                     else:
-                        self.print_error(";")
+                        self.raise_syntax_error(";")
                 else:
-                    self.print_error(")")
+                    self.raise_syntax_error(")")
             else:
-                self.print_error("(")
+                self.raise_syntax_error("(")
         return False
 
     def r_While(self):
@@ -295,13 +294,13 @@ class SyntaxAnalyzer:
                             self.Lexer.lexer()
                             return True
                         else:
-                            self.print_error("whileend")
+                            self.raise_syntax_error("whileend")
                     else:
-                        self.print_error("appropriate statement following while loop.")
+                        self.raise_syntax_error("appropriate statement following while loop.")
                 else:
-                    self.print_error(")")
+                    self.raise_syntax_error(")")
             else:
-                self.print_error("(")
+                self.raise_syntax_error("(")
         return False
 
     def r_Identifiers(self):
@@ -309,7 +308,7 @@ class SyntaxAnalyzer:
             self.Lexer.lexer()
             self.r_IdentifiersPrime()
         else:
-            self.print_error("Identifier")
+            self.raise_syntax_error("Identifier")
 
     def r_IdentifiersPrime(self):
         if self.t_lexeme(","):
@@ -336,7 +335,7 @@ class SyntaxAnalyzer:
                 self.r_DeclarationListPrime()
                 return True
             else:
-                self.print_error(";")
+                self.raise_syntax_error(";")
         return False
 
 
@@ -357,7 +356,7 @@ class SyntaxAnalyzer:
         if self.t_lexeme("==") or self.t_lexeme("^=") or self.t_lexeme(">") or self.t_lexeme("<") or self.t_lexeme("=>") or self.t_lexeme("=<"):
             self.Lexer.lexer()
         else:
-            self.print_error("Relational Operator")
+            self.raise_syntax_error("Relational Operator")
 
     def r_Expression(self):
         self.r_Term()
@@ -400,7 +399,7 @@ class SyntaxAnalyzer:
                 if self.t_lexeme(")"):
                     self.Lexer.lexer()
                 else:
-                    self.print_error(")")
+                    self.raise_syntax_error(")")
             else:
                 return
         elif self.t_lexeme("("):
@@ -410,9 +409,9 @@ class SyntaxAnalyzer:
                 self.Lexer.lexer()
                 return
             else:
-                self.print_error(")")
+                self.raise_syntax_error(")")
         else:
-            self.print_error("acceptable Primary Expression [Identifier, Real, Integer, Bool...")
+            self.raise_syntax_error("acceptable Primary Expression [Identifier, Real, Integer, Bool...")
 
     def r_Empty(self):
         return
