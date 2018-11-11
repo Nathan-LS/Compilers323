@@ -121,30 +121,38 @@ class SyntaxAnalyzer:
         return False
 
     def r_OptParameterList(self):
-        self.r_ParameterList()
-        self.r_Empty()
+        if self.r_ParameterList():
+            return
+        else:
+            self.r_Empty()
 
     def r_ParameterList(self):
-        self.r_Parameter()
-        self.r_ParameterListPrime()
+        if self.r_Parameter(flag="Doesn't need to pass"):
+            self.r_ParameterListPrime()
+            return True
+        return False
 
     def r_ParameterListPrime(self):
         if self.t_lexeme(","):
             self.Lexer.lexer()
             self.r_Parameter()
+            self.r_ParameterListPrime()
         else:
             self.r_Empty()
 
-    def r_Parameter(self):
+    def r_Parameter(self, flag="None"):
         if self.t_type(TokenIdentifier):
             self.Lexer.lexer()
             if self.t_lexeme(":"):
                 self.Lexer.lexer()
                 self.r_Qualifier()
+                return True
             else:
                 self.raise_syntax_error(":")
-        else:
+        elif flag == "None":
             self.raise_syntax_error("Identifier")
+        else:
+            return False
 
     def r_Qualifier(self, flag="None"):
         if self.t_lexeme("int") or self.t_lexeme("bool") or self.t_lexeme("real"):
