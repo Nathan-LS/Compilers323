@@ -8,21 +8,39 @@ function printtest (a : int, b: int, c:int, d:real, f:bool)
 }
 function printtest2f (a : int, b: int, c:int, d:real, e: int, f:bool)
 {
-
+[* comment
+multi
+line*]
     put(a);
-    put( (a+ b +c / (c + a)) + f);
+    put( (a+ b +c / (c + a)) + f + (((((-g))))));
     get(a);
     return a;
 }
 $$
 while( a => 5){
+while( a => 5){
     if ( a ^= 5){
         put(a);
     }
     else{
+    if ( a ^= 5){
+        put(a);
+    if ( a ^= 5){
+        put(a);
+    if ( a ^= 5){
+        put(a);
+        if ( a ^= 5){
+        put(a);
+    }else{
+    a = 6;
+    }ifend
+    }ifend
+    }ifend
+    }ifend
         a = 5;
         put(a + 5 + (10/5) - 2);
     }ifend
 
+}whileend
 }whileend
 $$
