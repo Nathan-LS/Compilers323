@@ -2,12 +2,14 @@
 
 block_cipher = None
 
+from PyInstaller.utils.hooks import collect_submodules
+added_hiddenimports = collect_submodules('colorama')
 
 a = Analysis(['../src/__main__.py'],
              pathex=['./src'],
              binaries=[],
              datas=[],
-             hiddenimports=[],
+             hiddenimports=added_hiddenimports,
              hookspath=[],
              runtime_hooks=[],
              excludes=[],
