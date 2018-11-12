@@ -1,0 +1,141 @@
+function convert1x(fahr : int, other : real, this: bool, yes: real,
+this: real, is: real, good: real) int v, a, p; real g, o, l; bool cat, dog, dawg;
+	{
+		{
+			get(word, cat, dog);
+			while(cat < dog)
+			{
+				put(this);
+				word= cat + dog;
+			}
+			whileend
+		}
+	}
+
+	function hey(this: bool, that: int, who: bool)
+	{
+		while(this < 0)
+		{
+			word = this;
+		}
+		whileend
+	}
+	function convert1x(fahr : int, other : real)
+	{
+		{
+			get(word, cat, dog);
+			while(cat < dog)
+			{
+				put(this);
+				word= cat + dog;
+			}
+			whileend
+		}
+	}
+
+	function hey(this: bool)
+	{
+		while(this < 0)
+		{
+			word = this;
+		}
+		whileend
+	}
+	function convert1x(fahr : int, other : real)
+	{
+		{
+			get(word, cat, dog);
+			while(cat < dog)
+			{
+				put(this);
+				word= cat + dog;
+			}
+			whileend
+		}
+	}
+
+	function hey(this: bool)
+	{
+		while(this < 0)
+		{
+			word = this;
+		}
+		whileend
+	}
+	function convert1x(fahr : int, other : real)
+	{
+		{
+			get(word, cat, dog);
+			while(cat < dog)
+			{
+				put(this);
+				word= cat + dog;
+			}
+			whileend
+		}
+	}
+
+	function hey(this: bool)
+	{
+		while(this < 0)
+		{
+			word = this;
+		}
+		whileend
+	}
+	function convert1x(fahr : int, other : real)
+	{
+		{
+			get(word, cat, dog);
+			while(cat < dog)
+			{
+				put(this);
+				word= cat + dog;
+			}
+			whileend
+		}
+	}
+
+	function hey(this: bool)
+	{
+		while(this < 0)
+		{
+			word = this;
+		}
+		whileend
+	}
+	function convert1x(fahr : int, other : real)
+	{
+		{
+			get(word, cat, dog);
+			while(cat < dog)
+			{
+				put(this);
+				word= cat + dog;
+			}
+			whileend
+		}
+	}
+
+	function hey(this: bool)
+	{
+		while(this < 0)
+		{
+			word = this;
+		}
+		whileend
+	}
+
+
+$$
+
+     int    low,  high, step;      [* declarations *]
+
+     get (low, high, step);
+     while (low  <  high )
+         {  put (low-high+high+1+1.5);
+             put (convert1x (low)+2);
+             low =  low  +  step * 3 + (4 - low);
+         }
+      whileend
+$$

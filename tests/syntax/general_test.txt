@@ -1,0 +1,27 @@
+[* Test Case 3 -> General Testing for a typical program *]
+
+function withdraw(a : real, b : real)
+{
+	if ( a =< b ){
+		return b-a;
+	}
+	else{
+		return b;
+	}ifend
+}
+function balance(c : real)
+{
+put(c);
+}
+$$
+real account, withdraw;
+bool continue;
+continue = false;
+account = 100.0;
+account = account - 5.0;
+
+
+while(continue == true){
+get(withdraw);
+}whileend
+$$

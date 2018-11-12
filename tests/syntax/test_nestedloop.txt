@@ -1,0 +1,26 @@
+[*Test Case 1 -> Nested if’s and multiple ifends*]
+
+function paramtest (x : int, y : int, z : real)
+{
+	if ( x ^= y){
+		if ( z == 0){
+			put(x);
+		}
+		else{
+			put(y);
+		}ifend
+	}ifend
+
+}
+$$
+
+int a;
+a = 5;
+while (a => 0)
+{
+	while(a =< 3){
+		put(a);
+	}whileend
+a = a - 1;
+}whileend
+$$
