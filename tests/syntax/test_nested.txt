@@ -6,7 +6,10 @@ function printtest (a : int, b: int, c:int, d:real, f:bool) int z,x,v;
     get(a);
     return a;
 }
-function printtest2f (a : int, b: int, c:int, d:real, e: int, f:bool)int z,x,v;
+function printtest2f (a : int, b: int, c:int, d:real, e: int, f:bool)
+int z,x,v;
+bool br, b2r;
+real r1r;
 {
 [* comment
 multi
