@@ -11,36 +11,36 @@ class SyntaxAnalyzer:
         self.Lexer = Lexer.Lexer(file_ptr, argp)
         self.print_out: bool = argp.syntax
         self.filename: str = argp.input
+
         self.state_strs_pending_print = []
         self.state_strs_pending_file = []
-
         self.productions_pending_write = []
         self.new_production = []
 
     def run_analyzer(self):
-        try:
-            self.r_Rat18F()
-        except CSyntaxError as ex:
-            self.print_p(str(ex), color=Fore.RED, force_console=True)
-        finally:
-            self.Lexer.finish_iterations()
-            self.Lexer.write_tokens()
-            self.write_productions()
+        try:  # entry point to the syntax analyzer
+            self.r_Rat18F()  # call the first rule
+        except CSyntaxError as ex:  # if a syntax error occurs we catch it here and print it to console and file using custom exceptions for lineno/ exepected, etc
+            self.print_p(str(ex), color=Fore.RED, force_console=True)  # output buffer add with red text for error message
+        finally:  # regardless of errors or success
+            self.Lexer.finish_iterations()  # obtain remaining tokens within the file
+            self.Lexer.write_tokens()  # write lexer tokens to their own file
+            self.write_productions()  # write all productions to separate file
 
     def write_productions(self):
-        fname = (os.path.join(os.path.dirname(self.filename), "syntax_{}".format(os.path.basename(self.filename))))
-        with open(fname, 'w') as f:
-            for sa in self.productions_pending_write:
+        fname = (os.path.join(os.path.dirname(self.filename), "syntax_{}".format(os.path.basename(self.filename))))  # prefix syntax to file name
+        with open(fname, 'w') as f:  # open file for write
+            for sa in self.productions_pending_write:  # iterate through list of productions used and output to the file
                 text_block = ""
                 for obj in sa:
                     text_block += str(obj) + '\n'
                 text_block += "\n"
-                if self.print_out:
+                if self.print_out:  # output production to console if the -s CLI arg is set
                     print(text_block)
                 f.write(text_block)
             print("Wrote {} syntax analysis productions or messages to the file: "
                   "'{}'".format(len(self.productions_pending_write), fname))
-            for p in self.state_strs_pending_file:
+            for p in self.state_strs_pending_file:  # output success or error messages to file and console
                 f.write(p)
             for p in self.state_strs_pending_print:
                 print(p)
@@ -52,39 +52,39 @@ class SyntaxAnalyzer:
         :param force_console: Force print to console regardless of the Syntax Analyzer print to console flag being set
         :return: None
         """
-        if self.print_out or force_console:
+        if self.print_out or force_console:  # helper function for color output status messages. error or success
             self.state_strs_pending_print.append(color + production_rule)
         self.state_strs_pending_file.append(production_rule)
 
     def lexer(self):
-        new_tok = self.Lexer.lexer()
+        new_tok = self.Lexer.lexer()  # proxy lexer to obtain token for pretty printout to file.
         self.new_production = [new_tok] + self.new_production
         self.productions_pending_write.append(self.new_production)
         self.new_production = []
 
-    def t_lexeme(self, lexeme):
+    def t_lexeme(self, lexeme):  # lexeme check. Peek the next token and check if the given lexeme str matches it.
         try:
             if self.Lexer.lexer_peek().is_lexeme(lexeme):
                 return True
             return False
-        except StopIteration:
+        except StopIteration:  # StopIteration is raised for an EOF by the lexer
             self.raise_syntax_error(lexeme)
 
-    def t_type(self, t_type):
+    def t_type(self, t_type):  # token type check. Peek next token and check if it's an identifier, relop, etc.
         try:
             if self.Lexer.lexer_peek().is_type(t_type):
                 return True
             return False
-        except StopIteration:
+        except StopIteration:  # StopIteration is raised for an EOF by the lexer
             self.raise_syntax_error(t_type.type_name())
 
-    def raise_syntax_error(self, expected):
+    def raise_syntax_error(self, expected):  # make the exception with the expected str and the peek token
         try:
             raise CSyntaxError(self.Lexer.lexer_peek(), expected)
         except StopIteration:
             raise CSyntaxErrorEOF(expected)
 
-    def r_Rat18F(self):
+    def r_Rat18F(self):  # first rule using the RDP parsing technique
         self.new_production.append("<Rat18F>\t-->\t<Opt Function Definitions>  '$$'  <Opt Declaration List>  "
                                    "<Statement List>  '$$'")
         self.r_OptFunctionDefinitions()
@@ -99,10 +99,10 @@ class SyntaxAnalyzer:
         else:
             self.raise_syntax_error("$$")
         try:
-            self.Lexer.lexer_peek()
+            self.Lexer.lexer_peek()  # check if there are remaining tokens after the last $$ marker
             self.print_p("Error. Expected end of file marker after $$ token.", color=Fore.RED, force_console=True)
             self.raise_syntax_error('$$')
-        except StopIteration:  # eof
+        except StopIteration:  # eof indicating pass of the Rat18R rule with no tokens remaining
             self.print_p("Success! There are no syntax errors here! :)", color=Fore.GREEN, force_console=True)
 
     def r_OptFunctionDefinitions(self):
