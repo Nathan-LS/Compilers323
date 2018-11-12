@@ -1,6 +1,7 @@
 from Tokens import *
 import argparse
 from CompilerExceptions import *
+import os
 
 
 class Lexer(object):
@@ -19,7 +20,7 @@ class Lexer(object):
         self.__line_number = 1
         self.__current_index = 0
         self.__tokens = []
-        self.__filename = argp.input
+        self.filename = argp.input
         self.__print = argp.tokens
 
     @property
@@ -111,7 +112,7 @@ class Lexer(object):
 
     def write_tokens(self):
         """write the tokens to the file tokens_filename.txt"""
-        fname = "tokens_{}".format(self.__filename)
+        fname = (os.path.join(os.path.dirname(self.filename), "lexer_{}".format(os.path.basename(self.filename))))
         with open(fname, 'w') as f:
             for t in self.__tokens:
                 f.write(str(t) + '\n')

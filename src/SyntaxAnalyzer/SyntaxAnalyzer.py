@@ -3,6 +3,7 @@ from CompilerExceptions import *
 import argparse
 import Lexer
 from colorama import Fore
+import os
 
 
 class SyntaxAnalyzer:
@@ -27,7 +28,7 @@ class SyntaxAnalyzer:
             self.write_productions()
 
     def write_productions(self):
-        fname = "syntax_{}".format(self.filename)
+        fname = (os.path.join(os.path.dirname(self.filename), "syntax_{}".format(os.path.basename(self.filename))))
         with open(fname, 'w') as f:
             for sa in self.productions_pending_write:
                 text_block = ""
