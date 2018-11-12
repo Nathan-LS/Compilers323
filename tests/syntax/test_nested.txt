@@ -1,4 +1,4 @@
-function printtest (a : int, b: int, c:int, d:real, f:bool)
+function printtest (a : int, b: int, c:int, d:real, f:bool) int z,x,v;
 {
 
     put(a);
@@ -6,7 +6,7 @@ function printtest (a : int, b: int, c:int, d:real, f:bool)
     get(a);
     return a;
 }
-function printtest2f (a : int, b: int, c:int, d:real, e: int, f:bool)
+function printtest2f (a : int, b: int, c:int, d:real, e: int, f:bool)int z,x,v;
 {
 [* comment
 multi
