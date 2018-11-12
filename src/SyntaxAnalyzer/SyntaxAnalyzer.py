@@ -10,7 +10,8 @@ class SyntaxAnalyzer:
         self.Lexer = Lexer.Lexer(file_ptr, argp)
         self.print_out: bool = argp.syntax
         self.filename: str = argp.input
-        self.productions_pending_print = []
+        self.state_strs_pending_print = []
+        self.state_strs_pending_file = []
 
         self.productions_pending_write = []
         self.new_production = []
@@ -29,11 +30,19 @@ class SyntaxAnalyzer:
         fname = "syntax_{}".format(self.filename)
         with open(fname, 'w') as f:
             for sa in self.productions_pending_write:
+                text_block = ""
                 for obj in sa:
-                    f.write(str(obj) + '\n')
-                f.write("\n")
-        print("Wrote {} syntax analysis productions or messages to the file: "
-              "'{}'".format(len(self.productions_pending_write), fname))
+                    text_block += str(obj) + '\n'
+                text_block += "\n"
+                if self.print_out:
+                    print(text_block)
+                f.write(text_block)
+            print("Wrote {} syntax analysis productions or messages to the file: "
+                  "'{}'".format(len(self.productions_pending_write), fname))
+            for p in self.state_strs_pending_file:
+                f.write(p)
+            for p in self.state_strs_pending_print:
+                print(p)
 
     def print_p(self, production_rule: str, color="", force_console=False):
         """
@@ -43,8 +52,8 @@ class SyntaxAnalyzer:
         :return: None
         """
         if self.print_out or force_console:
-            print(color + production_rule)
-        self.productions_pending_print.append(production_rule)
+            self.state_strs_pending_print.append(color + production_rule)
+        self.state_strs_pending_file.append(production_rule)
 
     def lexer(self):
         new_tok = self.Lexer.lexer()
