@@ -1,0 +1,58 @@
+[* this is comment for this sample code which
+   converts  Fahrenheit into Celcius *]
+[* this is comment for this sample code which
+   converts  Fahrenheit into Celcius *]
+   [* this is comment for this sample code which
+   converts  Fahrenheit into Celcius *]
+   [* this is comment for this sample code which
+   converts  Fahrenheit into Celci
+
+
+
+
+
+
+
+
+
+   testingus *]
+
+function convert1x (fahr : int)
+{
+
+            return fahr;
+}
+   [* this is comment for this sample code which *]
+
+function convert1x (fahr : int)
+{
+           return 5 * (fahr -32) / 9;
+}
+function convert1xa (fahr : int)
+{
+           return 5 * (fahr -32) / 9;
+}
+function convert1x (fahr : int)
+{
+           return 5 * (fahr -32) / 9;
+}
+
+$$
+ a = 5 + 5 + 5;
+ b = 7;
+ c = 10;
+ if ( a =< b + c ){
+        r = 5;
+        a = 5;
+        if ( a - b == a + c ){
+            return 5;
+        }
+        ifend
+ }
+ ifend
+ while ( a == 5){
+    put(a + c - b);
+ }
+ whileend
+ put (a * (b / c));
+$$
