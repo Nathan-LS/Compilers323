@@ -1,269 +1,54 @@
-token: Keyword      lexeme: 'function'   line:3
+token: Separator    lexeme: '$$'         line:4
 <Rat18F>	-->	<Opt Function Definitions>  '$$'  <Opt Declaration List>  <Statement List>  '$$'
 <Opt Function Definitions>	-->	<Function Definitions>  '|'  <Empty>
 <Function Definitions>	-->	<Function>  <Function Definition Prime>
 <Function>	-->	function  IDENTIFIER  (  <Optional Parameter List>  )  <Optional Declaration List>  Body
-
-token: Identifier   lexeme: 'paramtest'  line:3
-
-token: Separator    lexeme: '('          line:3
-
-token: Identifier   lexeme: 'x'          line:3
-<Optional Parameter List>	-->	<Parameter List>  '|'  <Empty>
-<Parameter List>	-->	<Parameter>  <Parameter List Prime>
-<Parameter>	-->	<IDs>  :  <Qualifier>
-
-token: Separator    lexeme: ':'          line:3
-
-token: Keyword      lexeme: 'int'        line:3
-<Qualifier>	-->	int  '|'  bool  '|'  real
-
-token: Separator    lexeme: ','          line:3
-<Parameter List Prime>	-->	,  <Parameter>  <Parameter List Prime>
-
-token: Identifier   lexeme: 'y'          line:3
-<Parameter>	-->	<IDs>  :  <Qualifier>
-
-token: Separator    lexeme: ':'          line:3
-
-token: Keyword      lexeme: 'int'        line:3
-<Qualifier>	-->	int  '|'  bool  '|'  real
-
-token: Separator    lexeme: ','          line:3
-<Parameter List Prime>	-->	,  <Parameter>  <Parameter List Prime>
-
-token: Identifier   lexeme: 'z'          line:3
-<Parameter>	-->	<IDs>  :  <Qualifier>
-
-token: Separator    lexeme: ':'          line:3
-
-token: Keyword      lexeme: 'real'       line:3
-<Qualifier>	-->	int  '|'  bool  '|'  real
-
-token: Separator    lexeme: ')'          line:3
-<Parameter List Prime>	-->	,  <Parameter>  <Parameter List Prime>
 <Empty>	-->	e
 
-token: Separator    lexeme: '{'          line:4
-<Optional Declaration List>	-->	<Declaration List>  '|'  <Empty>
-<Declaration List>	-->	<Declaration>  ;  <Declaration List Prime>
-<Declaration>	-->	<Qualifier>  <IDs>
-<Qualifier>	-->	int  '|'  bool  '|'  real
-<Empty>	-->	e
-<Body>	-->	{  <Statement List>  }
-
-token: Keyword      lexeme: 'if'         line:5
-<Statement List>	-->	<Statement>  <Statement List Prime>
-<Statement>	-->	<Compound>  '|'  <Assign>  '|'  <If>  '|'  <Print>  '|'  <Scan>  '|'  <While>
-<Compound>	-->	{  <Statement List>  }
-<Assign>	-->	IDENTIFIER  =  <Expression>  ;
-<If>	-->	if  (  <Condition>  )  <Statement>  <If Prime>
-
-token: Separator    lexeme: '('          line:5
-
-token: Identifier   lexeme: 'x'          line:5
-<Condition>	-->	<Expression>  <Relational Operator>  <Expression>
-<Expression>	-->	<Term>  <Expression Prime>
-<Term>	-->	<Factor>  <Term Prime>
-<Factor>	-->	-  <Primary>  '|'  <Primary>
-<Primary>	-->	IDENTIFIER  '|'  INTEGER  '|'  REAL  '|'  Identifier  (  <IDs>  )  '|'  (  <Expression>  )  '|'  true  '|'  false
-
-token: Operator     lexeme: '^='         line:5
-<Term Prime>	-->	*  <Factor>  <Term Prime>  '|'  /  <Factor>  <Term Prime>
-<Empty>	-->	e
-<Expression Prime>	-->	+  <Term>  <Expression Prime>  '|'  -  <Term>  <Expression Prime>
-<Empty>	-->	e
-<Relational Operator>	-->	==  '|'  ^=  '|'  >  '|'  <  '|'  =>  '|'  =<
-
-token: Identifier   lexeme: 'y'          line:5
-<Expression>	-->	<Term>  <Expression Prime>
-<Term>	-->	<Factor>  <Term Prime>
-<Factor>	-->	-  <Primary>  '|'  <Primary>
-<Primary>	-->	IDENTIFIER  '|'  INTEGER  '|'  REAL  '|'  Identifier  (  <IDs>  )  '|'  (  <Expression>  )  '|'  true  '|'  false
-
-token: Separator    lexeme: ')'          line:5
-<Term Prime>	-->	*  <Factor>  <Term Prime>  '|'  /  <Factor>  <Term Prime>
-<Empty>	-->	e
-<Expression Prime>	-->	+  <Term>  <Expression Prime>  '|'  -  <Term>  <Expression Prime>
-<Empty>	-->	e
-
-token: Separator    lexeme: '{'          line:5
-<Statement>	-->	<Compound>  '|'  <Assign>  '|'  <If>  '|'  <Print>  '|'  <Scan>  '|'  <While>
-<Compound>	-->	{  <Statement List>  }
-
-token: Keyword      lexeme: 'if'         line:6
-<Statement List>	-->	<Statement>  <Statement List Prime>
-<Statement>	-->	<Compound>  '|'  <Assign>  '|'  <If>  '|'  <Print>  '|'  <Scan>  '|'  <While>
-<Compound>	-->	{  <Statement List>  }
-<Assign>	-->	IDENTIFIER  =  <Expression>  ;
-<If>	-->	if  (  <Condition>  )  <Statement>  <If Prime>
-
-token: Separator    lexeme: '('          line:6
-
-token: Identifier   lexeme: 'z'          line:6
-<Condition>	-->	<Expression>  <Relational Operator>  <Expression>
-<Expression>	-->	<Term>  <Expression Prime>
-<Term>	-->	<Factor>  <Term Prime>
-<Factor>	-->	-  <Primary>  '|'  <Primary>
-<Primary>	-->	IDENTIFIER  '|'  INTEGER  '|'  REAL  '|'  Identifier  (  <IDs>  )  '|'  (  <Expression>  )  '|'  true  '|'  false
-
-token: Operator     lexeme: '=='         line:6
-<Term Prime>	-->	*  <Factor>  <Term Prime>  '|'  /  <Factor>  <Term Prime>
-<Empty>	-->	e
-<Expression Prime>	-->	+  <Term>  <Expression Prime>  '|'  -  <Term>  <Expression Prime>
-<Empty>	-->	e
-<Relational Operator>	-->	==  '|'  ^=  '|'  >  '|'  <  '|'  =>  '|'  =<
-
-token: Integer      lexeme: '0'          line:6
-<Expression>	-->	<Term>  <Expression Prime>
-<Term>	-->	<Factor>  <Term Prime>
-<Factor>	-->	-  <Primary>  '|'  <Primary>
-<Primary>	-->	IDENTIFIER  '|'  INTEGER  '|'  REAL  '|'  Identifier  (  <IDs>  )  '|'  (  <Expression>  )  '|'  true  '|'  false
-
-token: Separator    lexeme: ')'          line:6
-<Term Prime>	-->	*  <Factor>  <Term Prime>  '|'  /  <Factor>  <Term Prime>
-<Empty>	-->	e
-<Expression Prime>	-->	+  <Term>  <Expression Prime>  '|'  -  <Term>  <Expression Prime>
-<Empty>	-->	e
-
-token: Separator    lexeme: '{'          line:6
-<Statement>	-->	<Compound>  '|'  <Assign>  '|'  <If>  '|'  <Print>  '|'  <Scan>  '|'  <While>
-<Compound>	-->	{  <Statement List>  }
-
-token: Keyword      lexeme: 'put'        line:7
-<Statement List>	-->	<Statement>  <Statement List Prime>
-<Statement>	-->	<Compound>  '|'  <Assign>  '|'  <If>  '|'  <Print>  '|'  <Scan>  '|'  <While>
-<Compound>	-->	{  <Statement List>  }
-<Assign>	-->	IDENTIFIER  =  <Expression>  ;
-<If>	-->	if  (  <Condition>  )  <Statement>  <If Prime>
-<Return>	-->	return  <Return Prime>
-<Print>	-->	put  (  <Expression>  )  ;
-
-token: Separator    lexeme: '('          line:7
-
-token: Identifier   lexeme: 'x'          line:7
-<Expression>	-->	<Term>  <Expression Prime>
-<Term>	-->	<Factor>  <Term Prime>
-<Factor>	-->	-  <Primary>  '|'  <Primary>
-<Primary>	-->	IDENTIFIER  '|'  INTEGER  '|'  REAL  '|'  Identifier  (  <IDs>  )  '|'  (  <Expression>  )  '|'  true  '|'  false
-
-token: Separator    lexeme: ')'          line:7
-<Term Prime>	-->	*  <Factor>  <Term Prime>  '|'  /  <Factor>  <Term Prime>
-<Empty>	-->	e
-<Expression Prime>	-->	+  <Term>  <Expression Prime>  '|'  -  <Term>  <Expression Prime>
-<Empty>	-->	e
-
-token: Separator    lexeme: ';'          line:7
-
-token: Separator    lexeme: '}'          line:8
-<Statement List Prime>	-->	<Statement List>  '|'  <Empty>
-<Statement List>	-->	<Statement>  <Statement List Prime>
-<Statement>	-->	<Compound>  '|'  <Assign>  '|'  <If>  '|'  <Print>  '|'  <Scan>  '|'  <While>
-<Compound>	-->	{  <Statement List>  }
-<Assign>	-->	IDENTIFIER  =  <Expression>  ;
-<If>	-->	if  (  <Condition>  )  <Statement>  <If Prime>
-<Return>	-->	return  <Return Prime>
-<Print>	-->	put  (  <Expression>  )  ;
-<Scan>	-->	get  (  <IDs>  )  ;
-<While>	-->	while  (  <Condition>  )  <Statement>  whileend
-<Empty>	-->	e
-
-token: Keyword      lexeme: 'else'       line:9
-<If Prime>	-->	ifend  '|'  else  <Statement>  ifend
-
-token: Separator    lexeme: '{'          line:9
-<Statement>	-->	<Compound>  '|'  <Assign>  '|'  <If>  '|'  <Print>  '|'  <Scan>  '|'  <While>
-<Compound>	-->	{  <Statement List>  }
-
-token: Keyword      lexeme: 'put'        line:10
-<Statement List>	-->	<Statement>  <Statement List Prime>
-<Statement>	-->	<Compound>  '|'  <Assign>  '|'  <If>  '|'  <Print>  '|'  <Scan>  '|'  <While>
-<Compound>	-->	{  <Statement List>  }
-<Assign>	-->	IDENTIFIER  =  <Expression>  ;
-<If>	-->	if  (  <Condition>  )  <Statement>  <If Prime>
-<Return>	-->	return  <Return Prime>
-<Print>	-->	put  (  <Expression>  )  ;
-
-token: Separator    lexeme: '('          line:10
-
-token: Identifier   lexeme: 'y'          line:10
-<Expression>	-->	<Term>  <Expression Prime>
-<Term>	-->	<Factor>  <Term Prime>
-<Factor>	-->	-  <Primary>  '|'  <Primary>
-<Primary>	-->	IDENTIFIER  '|'  INTEGER  '|'  REAL  '|'  Identifier  (  <IDs>  )  '|'  (  <Expression>  )  '|'  true  '|'  false
-
-token: Separator    lexeme: ')'          line:10
-<Term Prime>	-->	*  <Factor>  <Term Prime>  '|'  /  <Factor>  <Term Prime>
-<Empty>	-->	e
-<Expression Prime>	-->	+  <Term>  <Expression Prime>  '|'  -  <Term>  <Expression Prime>
-<Empty>	-->	e
-
-token: Separator    lexeme: ';'          line:10
-
-token: Separator    lexeme: '}'          line:11
-<Statement List Prime>	-->	<Statement List>  '|'  <Empty>
-<Statement List>	-->	<Statement>  <Statement List Prime>
-<Statement>	-->	<Compound>  '|'  <Assign>  '|'  <If>  '|'  <Print>  '|'  <Scan>  '|'  <While>
-<Compound>	-->	{  <Statement List>  }
-<Assign>	-->	IDENTIFIER  =  <Expression>  ;
-<If>	-->	if  (  <Condition>  )  <Statement>  <If Prime>
-<Return>	-->	return  <Return Prime>
-<Print>	-->	put  (  <Expression>  )  ;
-<Scan>	-->	get  (  <IDs>  )  ;
-<While>	-->	while  (  <Condition>  )  <Statement>  whileend
-<Empty>	-->	e
-
-token: Keyword      lexeme: 'ifend'      line:11
-
-token: Separator    lexeme: '}'          line:12
-<Statement List Prime>	-->	<Statement List>  '|'  <Empty>
-<Statement List>	-->	<Statement>  <Statement List Prime>
-<Statement>	-->	<Compound>  '|'  <Assign>  '|'  <If>  '|'  <Print>  '|'  <Scan>  '|'  <While>
-<Compound>	-->	{  <Statement List>  }
-<Assign>	-->	IDENTIFIER  =  <Expression>  ;
-<If>	-->	if  (  <Condition>  )  <Statement>  <If Prime>
-<Return>	-->	return  <Return Prime>
-<Print>	-->	put  (  <Expression>  )  ;
-<Scan>	-->	get  (  <IDs>  )  ;
-<While>	-->	while  (  <Condition>  )  <Statement>  whileend
-<Empty>	-->	e
-
-token: Keyword      lexeme: 'ifend'      line:12
-<If Prime>	-->	ifend  '|'  else  <Statement>  ifend
-
-token: Separator    lexeme: '}'          line:14
-<Statement List Prime>	-->	<Statement List>  '|'  <Empty>
-<Statement List>	-->	<Statement>  <Statement List Prime>
-<Statement>	-->	<Compound>  '|'  <Assign>  '|'  <If>  '|'  <Print>  '|'  <Scan>  '|'  <While>
-<Compound>	-->	{  <Statement List>  }
-<Assign>	-->	IDENTIFIER  =  <Expression>  ;
-<If>	-->	if  (  <Condition>  )  <Statement>  <If Prime>
-<Return>	-->	return  <Return Prime>
-<Print>	-->	put  (  <Expression>  )  ;
-<Scan>	-->	get  (  <IDs>  )  ;
-<While>	-->	while  (  <Condition>  )  <Statement>  whileend
-<Empty>	-->	e
-
-token: Separator    lexeme: '$$'         line:15
-<Function Definition Prime>	-->	<Function Definitions  '|'  <Empty>
-<Function Definitions>	-->	<Function>  <Function Definition Prime>
-<Function>	-->	function  IDENTIFIER  (  <Optional Parameter List>  )  <Optional Declaration List>  Body
-<Empty>	-->	e
-
-token: Keyword      lexeme: 'int'        line:17
+token: Keyword      lexeme: 'int'        line:6
 <Optional Declaration List>	-->	<Declaration List>  '|'  <Empty>
 <Declaration List>	-->	<Declaration>  ;  <Declaration List Prime>
 <Declaration>	-->	<Qualifier>  <IDs>
 <Qualifier>	-->	int  '|'  bool  '|'  real
 
-token: Identifier   lexeme: 'a'          line:17
+token: Identifier   lexeme: 'a'          line:6
 <IDs>	-->	IDENTIFIER  <IDs Prime>
 
-token: Separator    lexeme: ';'          line:17
+token: Separator    lexeme: ','          line:6
+<IDs Prime>	-->	,  <IDs>  '|'  <Empty>
+
+token: Identifier   lexeme: 'b'          line:6
+<IDs>	-->	IDENTIFIER  <IDs Prime>
+
+token: Separator    lexeme: ','          line:6
+<IDs Prime>	-->	,  <IDs>  '|'  <Empty>
+
+token: Identifier   lexeme: 'c'          line:6
+<IDs>	-->	IDENTIFIER  <IDs Prime>
+
+token: Separator    lexeme: ','          line:6
+<IDs Prime>	-->	,  <IDs>  '|'  <Empty>
+
+token: Identifier   lexeme: 'd'          line:6
+<IDs>	-->	IDENTIFIER  <IDs Prime>
+
+token: Separator    lexeme: ','          line:6
+<IDs Prime>	-->	,  <IDs>  '|'  <Empty>
+
+token: Identifier   lexeme: 'e'          line:6
+<IDs>	-->	IDENTIFIER  <IDs Prime>
+
+token: Separator    lexeme: ','          line:6
+<IDs Prime>	-->	,  <IDs>  '|'  <Empty>
+
+token: Identifier   lexeme: 'z'          line:6
+<IDs>	-->	IDENTIFIER  <IDs Prime>
+
+token: Separator    lexeme: ';'          line:6
 <IDs Prime>	-->	,  <IDs>  '|'  <Empty>
 <Empty>	-->	e
 
-token: Identifier   lexeme: 'a'          line:18
+token: Identifier   lexeme: 'b'          line:7
 <Declaration List Prime>	-->	<Declaration List>  '|'  <Empty>
 <Declaration List>	-->	<Declaration>  ;  <Declaration List Prime>
 <Declaration>	-->	<Qualifier>  <IDs>
@@ -274,21 +59,42 @@ token: Identifier   lexeme: 'a'          line:18
 <Compound>	-->	{  <Statement List>  }
 <Assign>	-->	IDENTIFIER  =  <Expression>  ;
 
-token: Operator     lexeme: '='          line:18
+token: Operator     lexeme: '='          line:7
 
-token: Integer      lexeme: '5'          line:18
+token: Identifier   lexeme: 'z'          line:7
 <Expression>	-->	<Term>  <Expression Prime>
 <Term>	-->	<Factor>  <Term Prime>
 <Factor>	-->	-  <Primary>  '|'  <Primary>
 <Primary>	-->	IDENTIFIER  '|'  INTEGER  '|'  REAL  '|'  Identifier  (  <IDs>  )  '|'  (  <Expression>  )  '|'  true  '|'  false
 
-token: Separator    lexeme: ';'          line:18
+token: Separator    lexeme: ';'          line:7
 <Term Prime>	-->	*  <Factor>  <Term Prime>  '|'  /  <Factor>  <Term Prime>
 <Empty>	-->	e
 <Expression Prime>	-->	+  <Term>  <Expression Prime>  '|'  -  <Term>  <Expression Prime>
 <Empty>	-->	e
 
-token: Keyword      lexeme: 'while'      line:19
+token: Identifier   lexeme: 'a'          line:8
+<Statement List Prime>	-->	<Statement List>  '|'  <Empty>
+<Statement List>	-->	<Statement>  <Statement List Prime>
+<Statement>	-->	<Compound>  '|'  <Assign>  '|'  <If>  '|'  <Print>  '|'  <Scan>  '|'  <While>
+<Compound>	-->	{  <Statement List>  }
+<Assign>	-->	IDENTIFIER  =  <Expression>  ;
+
+token: Operator     lexeme: '='          line:8
+
+token: Integer      lexeme: '5'          line:8
+<Expression>	-->	<Term>  <Expression Prime>
+<Term>	-->	<Factor>  <Term Prime>
+<Factor>	-->	-  <Primary>  '|'  <Primary>
+<Primary>	-->	IDENTIFIER  '|'  INTEGER  '|'  REAL  '|'  Identifier  (  <IDs>  )  '|'  (  <Expression>  )  '|'  true  '|'  false
+
+token: Separator    lexeme: ';'          line:8
+<Term Prime>	-->	*  <Factor>  <Term Prime>  '|'  /  <Factor>  <Term Prime>
+<Empty>	-->	e
+<Expression Prime>	-->	+  <Term>  <Expression Prime>  '|'  -  <Term>  <Expression Prime>
+<Empty>	-->	e
+
+token: Keyword      lexeme: 'while'      line:9
 <Statement List Prime>	-->	<Statement List>  '|'  <Empty>
 <Statement List>	-->	<Statement>  <Statement List Prime>
 <Statement>	-->	<Compound>  '|'  <Assign>  '|'  <If>  '|'  <Print>  '|'  <Scan>  '|'  <While>
@@ -300,39 +106,39 @@ token: Keyword      lexeme: 'while'      line:19
 <Scan>	-->	get  (  <IDs>  )  ;
 <While>	-->	while  (  <Condition>  )  <Statement>  whileend
 
-token: Separator    lexeme: '('          line:19
+token: Separator    lexeme: '('          line:9
 
-token: Identifier   lexeme: 'a'          line:19
+token: Identifier   lexeme: 'a'          line:9
 <Condition>	-->	<Expression>  <Relational Operator>  <Expression>
 <Expression>	-->	<Term>  <Expression Prime>
 <Term>	-->	<Factor>  <Term Prime>
 <Factor>	-->	-  <Primary>  '|'  <Primary>
 <Primary>	-->	IDENTIFIER  '|'  INTEGER  '|'  REAL  '|'  Identifier  (  <IDs>  )  '|'  (  <Expression>  )  '|'  true  '|'  false
 
-token: Operator     lexeme: '=>'         line:19
+token: Operator     lexeme: '=>'         line:9
 <Term Prime>	-->	*  <Factor>  <Term Prime>  '|'  /  <Factor>  <Term Prime>
 <Empty>	-->	e
 <Expression Prime>	-->	+  <Term>  <Expression Prime>  '|'  -  <Term>  <Expression Prime>
 <Empty>	-->	e
 <Relational Operator>	-->	==  '|'  ^=  '|'  >  '|'  <  '|'  =>  '|'  =<
 
-token: Integer      lexeme: '0'          line:19
+token: Integer      lexeme: '0'          line:9
 <Expression>	-->	<Term>  <Expression Prime>
 <Term>	-->	<Factor>  <Term Prime>
 <Factor>	-->	-  <Primary>  '|'  <Primary>
 <Primary>	-->	IDENTIFIER  '|'  INTEGER  '|'  REAL  '|'  Identifier  (  <IDs>  )  '|'  (  <Expression>  )  '|'  true  '|'  false
 
-token: Separator    lexeme: ')'          line:19
+token: Separator    lexeme: ')'          line:9
 <Term Prime>	-->	*  <Factor>  <Term Prime>  '|'  /  <Factor>  <Term Prime>
 <Empty>	-->	e
 <Expression Prime>	-->	+  <Term>  <Expression Prime>  '|'  -  <Term>  <Expression Prime>
 <Empty>	-->	e
 
-token: Separator    lexeme: '{'          line:20
+token: Separator    lexeme: '{'          line:10
 <Statement>	-->	<Compound>  '|'  <Assign>  '|'  <If>  '|'  <Print>  '|'  <Scan>  '|'  <While>
 <Compound>	-->	{  <Statement List>  }
 
-token: Keyword      lexeme: 'while'      line:21
+token: Keyword      lexeme: 'while'      line:11
 <Statement List>	-->	<Statement>  <Statement List Prime>
 <Statement>	-->	<Compound>  '|'  <Assign>  '|'  <If>  '|'  <Print>  '|'  <Scan>  '|'  <While>
 <Compound>	-->	{  <Statement List>  }
@@ -343,39 +149,39 @@ token: Keyword      lexeme: 'while'      line:21
 <Scan>	-->	get  (  <IDs>  )  ;
 <While>	-->	while  (  <Condition>  )  <Statement>  whileend
 
-token: Separator    lexeme: '('          line:21
+token: Separator    lexeme: '('          line:11
 
-token: Identifier   lexeme: 'a'          line:21
+token: Identifier   lexeme: 'a'          line:11
 <Condition>	-->	<Expression>  <Relational Operator>  <Expression>
 <Expression>	-->	<Term>  <Expression Prime>
 <Term>	-->	<Factor>  <Term Prime>
 <Factor>	-->	-  <Primary>  '|'  <Primary>
 <Primary>	-->	IDENTIFIER  '|'  INTEGER  '|'  REAL  '|'  Identifier  (  <IDs>  )  '|'  (  <Expression>  )  '|'  true  '|'  false
 
-token: Operator     lexeme: '=<'         line:21
+token: Operator     lexeme: '=<'         line:11
 <Term Prime>	-->	*  <Factor>  <Term Prime>  '|'  /  <Factor>  <Term Prime>
 <Empty>	-->	e
 <Expression Prime>	-->	+  <Term>  <Expression Prime>  '|'  -  <Term>  <Expression Prime>
 <Empty>	-->	e
 <Relational Operator>	-->	==  '|'  ^=  '|'  >  '|'  <  '|'  =>  '|'  =<
 
-token: Integer      lexeme: '3'          line:21
+token: Integer      lexeme: '3'          line:11
 <Expression>	-->	<Term>  <Expression Prime>
 <Term>	-->	<Factor>  <Term Prime>
 <Factor>	-->	-  <Primary>  '|'  <Primary>
 <Primary>	-->	IDENTIFIER  '|'  INTEGER  '|'  REAL  '|'  Identifier  (  <IDs>  )  '|'  (  <Expression>  )  '|'  true  '|'  false
 
-token: Separator    lexeme: ')'          line:21
+token: Separator    lexeme: ')'          line:11
 <Term Prime>	-->	*  <Factor>  <Term Prime>  '|'  /  <Factor>  <Term Prime>
 <Empty>	-->	e
 <Expression Prime>	-->	+  <Term>  <Expression Prime>  '|'  -  <Term>  <Expression Prime>
 <Empty>	-->	e
 
-token: Separator    lexeme: '{'          line:21
+token: Separator    lexeme: '{'          line:11
 <Statement>	-->	<Compound>  '|'  <Assign>  '|'  <If>  '|'  <Print>  '|'  <Scan>  '|'  <While>
 <Compound>	-->	{  <Statement List>  }
 
-token: Keyword      lexeme: 'put'        line:22
+token: Keyword      lexeme: 'put'        line:12
 <Statement List>	-->	<Statement>  <Statement List Prime>
 <Statement>	-->	<Compound>  '|'  <Assign>  '|'  <If>  '|'  <Print>  '|'  <Scan>  '|'  <While>
 <Compound>	-->	{  <Statement List>  }
@@ -384,23 +190,23 @@ token: Keyword      lexeme: 'put'        line:22
 <Return>	-->	return  <Return Prime>
 <Print>	-->	put  (  <Expression>  )  ;
 
-token: Separator    lexeme: '('          line:22
+token: Separator    lexeme: '('          line:12
 
-token: Identifier   lexeme: 'a'          line:22
+token: Identifier   lexeme: 'a'          line:12
 <Expression>	-->	<Term>  <Expression Prime>
 <Term>	-->	<Factor>  <Term Prime>
 <Factor>	-->	-  <Primary>  '|'  <Primary>
 <Primary>	-->	IDENTIFIER  '|'  INTEGER  '|'  REAL  '|'  Identifier  (  <IDs>  )  '|'  (  <Expression>  )  '|'  true  '|'  false
 
-token: Separator    lexeme: ')'          line:22
+token: Separator    lexeme: ')'          line:12
 <Term Prime>	-->	*  <Factor>  <Term Prime>  '|'  /  <Factor>  <Term Prime>
 <Empty>	-->	e
 <Expression Prime>	-->	+  <Term>  <Expression Prime>  '|'  -  <Term>  <Expression Prime>
 <Empty>	-->	e
 
-token: Separator    lexeme: ';'          line:22
+token: Separator    lexeme: ';'          line:12
 
-token: Separator    lexeme: '}'          line:23
+token: Separator    lexeme: '}'          line:13
 <Statement List Prime>	-->	<Statement List>  '|'  <Empty>
 <Statement List>	-->	<Statement>  <Statement List Prime>
 <Statement>	-->	<Compound>  '|'  <Assign>  '|'  <If>  '|'  <Print>  '|'  <Scan>  '|'  <While>
@@ -413,40 +219,40 @@ token: Separator    lexeme: '}'          line:23
 <While>	-->	while  (  <Condition>  )  <Statement>  whileend
 <Empty>	-->	e
 
-token: Keyword      lexeme: 'whileend'   line:23
+token: Keyword      lexeme: 'whileend'   line:13
 
-token: Identifier   lexeme: 'a'          line:24
+token: Identifier   lexeme: 'a'          line:14
 <Statement List Prime>	-->	<Statement List>  '|'  <Empty>
 <Statement List>	-->	<Statement>  <Statement List Prime>
 <Statement>	-->	<Compound>  '|'  <Assign>  '|'  <If>  '|'  <Print>  '|'  <Scan>  '|'  <While>
 <Compound>	-->	{  <Statement List>  }
 <Assign>	-->	IDENTIFIER  =  <Expression>  ;
 
-token: Operator     lexeme: '='          line:24
+token: Operator     lexeme: '='          line:14
 
-token: Identifier   lexeme: 'a'          line:24
+token: Identifier   lexeme: 'a'          line:14
 <Expression>	-->	<Term>  <Expression Prime>
 <Term>	-->	<Factor>  <Term Prime>
 <Factor>	-->	-  <Primary>  '|'  <Primary>
 <Primary>	-->	IDENTIFIER  '|'  INTEGER  '|'  REAL  '|'  Identifier  (  <IDs>  )  '|'  (  <Expression>  )  '|'  true  '|'  false
 
-token: Operator     lexeme: '-'          line:24
+token: Operator     lexeme: '-'          line:14
 <Term Prime>	-->	*  <Factor>  <Term Prime>  '|'  /  <Factor>  <Term Prime>
 <Empty>	-->	e
 <Expression Prime>	-->	+  <Term>  <Expression Prime>  '|'  -  <Term>  <Expression Prime>
 
-token: Integer      lexeme: '1'          line:24
+token: Integer      lexeme: '1'          line:14
 <Term>	-->	<Factor>  <Term Prime>
 <Factor>	-->	-  <Primary>  '|'  <Primary>
 <Primary>	-->	IDENTIFIER  '|'  INTEGER  '|'  REAL  '|'  Identifier  (  <IDs>  )  '|'  (  <Expression>  )  '|'  true  '|'  false
 
-token: Separator    lexeme: ';'          line:24
+token: Separator    lexeme: ';'          line:14
 <Term Prime>	-->	*  <Factor>  <Term Prime>  '|'  /  <Factor>  <Term Prime>
 <Empty>	-->	e
 <Expression Prime>	-->	+  <Term>  <Expression Prime>  '|'  -  <Term>  <Expression Prime>
 <Empty>	-->	e
 
-token: Separator    lexeme: '}'          line:25
+token: Separator    lexeme: '}'          line:15
 <Statement List Prime>	-->	<Statement List>  '|'  <Empty>
 <Statement List>	-->	<Statement>  <Statement List Prime>
 <Statement>	-->	<Compound>  '|'  <Assign>  '|'  <If>  '|'  <Print>  '|'  <Scan>  '|'  <While>
@@ -459,9 +265,9 @@ token: Separator    lexeme: '}'          line:25
 <While>	-->	while  (  <Condition>  )  <Statement>  whileend
 <Empty>	-->	e
 
-token: Keyword      lexeme: 'whileend'   line:25
+token: Keyword      lexeme: 'whileend'   line:15
 
-token: Separator    lexeme: '$$'         line:26
+token: Separator    lexeme: '$$'         line:16
 <Statement List Prime>	-->	<Statement List>  '|'  <Empty>
 <Statement List>	-->	<Statement>  <Statement List Prime>
 <Statement>	-->	<Compound>  '|'  <Assign>  '|'  <If>  '|'  <Print>  '|'  <Scan>  '|'  <While>

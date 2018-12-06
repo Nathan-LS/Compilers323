@@ -1,1 +1,0 @@
-from .SymbolTable import SymbolTable

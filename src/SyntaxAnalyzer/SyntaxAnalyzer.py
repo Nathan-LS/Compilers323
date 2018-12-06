@@ -1,6 +1,6 @@
 from Tokens import *
 from CompilerExceptions import *
-from SymbolTable import *
+import Assembler
 import Lexer
 from colorama import Fore
 import os
@@ -27,7 +27,7 @@ class SyntaxAnalyzer:
             self.Lexer.finish_iterations()  # obtain remaining tokens within the file
             self.Lexer.write_tokens()  # write lexer tokens to their own file
             self.write_productions()  # write all productions to separate file
-            SymbolTable().write_symbols(self.filename, self.args.symbols)
+            Assembler.SymbolTable().write_symbols(self.filename, self.args.symbols)
 
     def write_productions(self):
         fname = (os.path.join(os.path.dirname(self.filename), "syntax_{}".format(os.path.basename(self.filename))))  # prefix syntax to file name
@@ -75,7 +75,7 @@ class SyntaxAnalyzer:
     def t_type(self, t_type):  # token type check. Peek next token and check if it's an identifier, relop, etc.
         try:
             if self.Lexer.lexer_peek().is_type(TokenIdentifier):
-                self.Lexer.lexer_peek().insert_symbol()
+                Assembler.SymbolTable().insert_identifier(self.Lexer.lexer_peek())
             if self.Lexer.lexer_peek().is_type(t_type):
                 return True
             return False
@@ -194,7 +194,7 @@ class SyntaxAnalyzer:
     def r_Qualifier(self, flag="None"):
         self.new_production.append("<Qualifier>\t-->\tint  '|'  bool  '|'  real")
         if self.t_lexeme("int") or self.t_lexeme("bool") or self.t_lexeme("real"):
-            SymbolTable().set_type(self.Lexer.lexer_peek().lexeme)
+            Assembler.SymbolTable().set_type(self.Lexer.lexer_peek().lexeme)
             self.lexer()
             return True
         elif flag != "None":
@@ -440,7 +440,7 @@ class SyntaxAnalyzer:
         self.new_production.append("<Declaration>\t-->\t<Qualifier>  <IDs>")
         if self.r_Qualifier("Doesn't need to pass"):
             self.r_Identifiers()
-            SymbolTable().reset_type()
+            Assembler.SymbolTable().reset_type()
             return True
         else:
             return False

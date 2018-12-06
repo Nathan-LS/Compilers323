@@ -65,3 +65,6 @@ class SymbolTable(metaclass=SymbolTableSingleton):
                     print(s)
             print("Wrote {} symbols to the file: ""'{}'.".format(len(self.symbol_table), fname))
 
+    def store_memory(self, memory_location, value):
+        self.memory[memory_location] = value
+
