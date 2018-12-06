@@ -74,6 +74,8 @@ class SyntaxAnalyzer:
 
     def t_type(self, t_type):  # token type check. Peek next token and check if it's an identifier, relop, etc.
         try:
+            if self.Lexer.lexer_peek().is_type(TokenIdentifier):
+                self.Lexer.lexer_peek().insert_symbol()
             if self.Lexer.lexer_peek().is_type(t_type):
                 return True
             return False
@@ -192,6 +194,7 @@ class SyntaxAnalyzer:
     def r_Qualifier(self, flag="None"):
         self.new_production.append("<Qualifier>\t-->\tint  '|'  bool  '|'  real")
         if self.t_lexeme("int") or self.t_lexeme("bool") or self.t_lexeme("real"):
+            SymbolTable().set_type(self.Lexer.lexer_peek().lexeme)
             self.lexer()
             return True
         elif flag != "None":
@@ -389,7 +392,6 @@ class SyntaxAnalyzer:
     def r_Identifiers(self):
         self.new_production.append("<IDs>\t-->\tIDENTIFIER  <IDs Prime>")
         if self.t_type(TokenIdentifier):
-            SymbolTable().insert_identifier(self.Lexer.lexer_peek().lexeme)
             self.lexer()
             self.r_IdentifiersPrime()
         else:
@@ -438,6 +440,7 @@ class SyntaxAnalyzer:
         self.new_production.append("<Declaration>\t-->\t<Qualifier>  <IDs>")
         if self.r_Qualifier("Doesn't need to pass"):
             self.r_Identifiers()
+            SymbolTable().reset_type()
             return True
         else:
             return False

@@ -25,6 +25,17 @@ class CSyntaxError(CompilerExceptions):
         return msg
 
 
+class UndeclaredVariable(CSyntaxError):
+    def get_message(self):
+        return "Error on line {}. Use of an undeclared variable: '{}'.".format(self.token.line, self.token.lexeme)
+
+
+class RedeclaredVariable(CSyntaxError):
+    def get_message(self):
+        return "Error on line {}. Attempting to redeclare an already declared variable: '{}'." \
+               "".format(self.token.line, self.token.lexeme)
+
+
 class CSyntaxErrorEOF(CSyntaxError):
     def __init__(self, expect=None):
         self.expect = expect
