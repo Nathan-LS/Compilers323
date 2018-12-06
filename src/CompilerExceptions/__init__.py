@@ -1,1 +1,1 @@
-from .CompilerExceptions import CSyntaxError, BackTrackerInvalidIndex, CSyntaxErrorEOF
+from .CompilerExceptions import CSyntaxError, BackTrackerInvalidIndex, CSyntaxErrorEOF, SymbolExists

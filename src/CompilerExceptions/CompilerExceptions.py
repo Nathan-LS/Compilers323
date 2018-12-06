@@ -39,3 +39,8 @@ class CSyntaxErrorEOF(CSyntaxError):
 class BackTrackerInvalidIndex(CompilerExceptions):
     def get_message(self):
         return "Invalid backtracking index."
+
+
+class SymbolExists(CompilerExceptions):
+    def get_message(self):
+        return "Symbol already exits in the symbol table."

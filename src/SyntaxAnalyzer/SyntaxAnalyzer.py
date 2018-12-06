@@ -1,6 +1,6 @@
 from Tokens import *
 from CompilerExceptions import *
-import argparse
+from SymbolTable import *
 import Lexer
 from colorama import Fore
 import os
@@ -9,6 +9,7 @@ import os
 class SyntaxAnalyzer:
     def __init__(self, file_ptr, argp):
         self.Lexer = Lexer.Lexer(file_ptr, argp)
+        self.args = argp
         self.print_out: bool = argp.syntax
         self.filename: str = argp.input
 
@@ -26,6 +27,7 @@ class SyntaxAnalyzer:
             self.Lexer.finish_iterations()  # obtain remaining tokens within the file
             self.Lexer.write_tokens()  # write lexer tokens to their own file
             self.write_productions()  # write all productions to separate file
+            SymbolTable().write_symbols(self.filename, self.args.symbols)
 
     def write_productions(self):
         fname = (os.path.join(os.path.dirname(self.filename), "syntax_{}".format(os.path.basename(self.filename))))  # prefix syntax to file name
@@ -387,6 +389,7 @@ class SyntaxAnalyzer:
     def r_Identifiers(self):
         self.new_production.append("<IDs>\t-->\tIDENTIFIER  <IDs Prime>")
         if self.t_type(TokenIdentifier):
+            SymbolTable().insert_identifier(self.Lexer.lexer_peek().lexeme)
             self.lexer()
             self.r_IdentifiersPrime()
         else:
@@ -423,7 +426,6 @@ class SyntaxAnalyzer:
             else:
                 self.raise_syntax_error(";")
         return False
-
 
     def r_DeclarationListPrime(self):
         self.new_production.append("<Declaration List Prime>\t-->\t<Declaration List>  '|'  <Empty>")
