@@ -1,6 +1,6 @@
 import CompilerExceptions
 import os
-from Tokens import TokenBase
+from Tokens import TokenIdentifier
 from .Singleton import Singleton
 
 
@@ -38,7 +38,7 @@ class SymbolTable(metaclass=Singleton):
         """
         self.current_identifier_type = None
 
-    def insert_identifier(self, identifier: TokenBase)->None:
+    def insert_identifier(self, identifier: TokenIdentifier)->None:
         if self.symbol_table.get(identifier.lexeme) is None:
             self.symbol_table[identifier.lexeme] = self.memory_address  # set key to name of identifier and val to memory location
             self.memory[self.memory_address] = None  # initially set declared variables to have no value
@@ -66,4 +66,17 @@ class SymbolTable(metaclass=Singleton):
 
     def store_memory(self, memory_location, value):
         self.memory[memory_location] = value
+
+    def get_address(self, identifier: TokenIdentifier)->int:
+        """
+        Given an identifier, return the memory address. Returns -1 if the identifier does not exist/undeclared
+        :param identifier:
+        :return: int
+        """
+        mem_address = self.symbol_table.get(identifier.lexeme)
+        if mem_address is None:
+            return -1
+        else:
+            return mem_address
+
 

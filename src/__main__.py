@@ -12,10 +12,10 @@ class Main(object):
         argp.add_argument("--input", "-i", help="File input to compile and run.", type=str, required=True)
         argp.add_argument("--tokens", "-t", help="Output the tokens from the lexer to the program console.",
                           action="store_true", default=False)
-        argp.add_argument("--syntax", "-a", help="Output the syntax rules from the syntax analyzer to the program "
+        argp.add_argument("--syntax", "-s", help="Output the syntax rules from the syntax analyzer to the program "
                                                  "console.", action="store_true", default=False)
-        argp.add_argument("--symbols", "-s", help="Output the symbol table to the program console.",
-                          action="store_true", default=False)
+        argp.add_argument("--assembler", "-a", help="Output the symbol table and assembly instructions to the program"
+                                                    " console.", action="store_true", default=False)
         return argp.parse_args()
 
     @classmethod

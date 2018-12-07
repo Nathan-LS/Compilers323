@@ -1,10 +1,13 @@
 from .Singleton import Singleton
 from .SymbolTable import SymbolTable
+import os
 
 
 class VirtualMachine(metaclass=Singleton):
     def __init__(self):
         self.stack = []
+        self.pc_counter = 0
+        self.pending_instructions = []
 
     def pushi(self, integer_value):
         """pushes the integer value onto the top of the stack"""
@@ -112,3 +115,20 @@ class VirtualMachine(metaclass=Singleton):
     def label(self):  # todo
         """empty instruction; provides the instruction location to jump to"""
         raise NotImplementedError
+
+    def generate_instruction(self, op, oprnd):
+        entry = "{:>4} {:>6} {:>10}".format(self.pc_counter, op, oprnd)
+        self.pending_instructions.append(entry)
+        self.pc_counter += 1
+
+    def write_instructions(self, filename, console_print=False):
+        fname = (os.path.join(os.path.dirname(filename), "instructions_{}".format(os.path.basename(filename))))  # prefix syntax to file name
+        header = "{:<15} {:<16} {:<8}".format('Address', 'OP', 'Oprnd')
+        self.pending_instructions.insert(0, header)
+        with open(fname, 'w') as f:  # open file for write
+            for s in self.pending_instructions:  # iterate through list of productions used and output to the file
+                f.write(s)
+                f.write('\n')
+                if console_print:
+                    print(s)
+            print("Wrote {} instructions to the file: ""'{}'.".format(len(self.pending_instructions) -1, fname))

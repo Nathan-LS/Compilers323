@@ -27,7 +27,8 @@ class SyntaxAnalyzer:
             self.Lexer.finish_iterations()  # obtain remaining tokens within the file
             self.Lexer.write_tokens()  # write lexer tokens to their own file
             self.write_productions()  # write all productions to separate file
-            Assembler.SymbolTable().write_symbols(self.filename, self.args.symbols)
+            Assembler.SymbolTable().write_symbols(self.filename, self.args.assembler)
+            Assembler.VirtualMachine().write_instructions(self.filename, self.args.assembler)
 
     def write_productions(self):
         fname = (os.path.join(os.path.dirname(self.filename), "syntax_{}".format(os.path.basename(self.filename))))  # prefix syntax to file name
