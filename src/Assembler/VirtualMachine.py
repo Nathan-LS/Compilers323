@@ -1,22 +1,10 @@
-import threading
+from .Singleton import Singleton
 from .SymbolTable import SymbolTable
 
 
-class VirtualMachineSingleton(type):
-    __init_lock = threading.Lock()
-    __instance = None
-
-    def __call__(cls, *args, **kwargs):
-        with cls.__init_lock:
-            if not cls.__instance:
-                cls.__instance = super(VirtualMachineSingleton, cls).__call__(*args, **kwargs)
-            return cls.__instance
-
-
-class VirtualMachine(metaclass=VirtualMachineSingleton):
+class VirtualMachine(metaclass=Singleton):
     def __init__(self):
         self.stack = []
-        self.SymbolTable = SymbolTable()
 
     def pushi(self, integer_value):
         """pushes the integer value onto the top of the stack"""
@@ -28,13 +16,13 @@ class VirtualMachine(metaclass=VirtualMachineSingleton):
 
     def popm(self, memory_location):
         """pops the value from the TOS and stores it at memory location"""
-        self.SymbolTable.store_memory(memory_location, self.stack.pop())
+        SymbolTable().store_memory(memory_location, self.stack.pop())
 
     def stdout(self):
         """pops the value from TOS and outputs it to the standard output"""
         print(self.stack.pop())
 
-    def stdin(self): #todo
+    def stdin(self):  # todo
         """get the value from the standard input and place it onto the TOS"""
         raise NotImplementedError
 

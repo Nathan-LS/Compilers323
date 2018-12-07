@@ -74,7 +74,7 @@ class SyntaxAnalyzer:
 
     def t_type(self, t_type):  # token type check. Peek next token and check if it's an identifier, relop, etc.
         try:
-            if self.Lexer.lexer_peek().is_type(TokenIdentifier):
+            if self.Lexer.lexer_peek().is_type(TokenIdentifier):  # if we get a identifier then make sure to submit to symbol table
                 Assembler.SymbolTable().insert_identifier(self.Lexer.lexer_peek())
             if self.Lexer.lexer_peek().is_type(t_type):
                 return True
@@ -91,7 +91,7 @@ class SyntaxAnalyzer:
     def r_Rat18F(self):  # first rule using the RDP parsing technique
         self.new_production.append("<Rat18F>\t-->\t<Opt Function Definitions>  '$$'  <Opt Declaration List>  "
                                    "<Statement List>  '$$'")
-        self.r_OptFunctionDefinitions()
+        # self.r_OptFunctionDefinitions()  # todo temporary removal of functions as specified for the assignment
         if self.t_lexeme("$$"):
             self.lexer()
             self.r_OptDeclarationList()
