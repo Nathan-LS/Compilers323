@@ -1,6 +1,6 @@
 from Tokens import *
 from CompilerExceptions import *
-from Assembler import *
+from Assembler import SymbolTable, VirtualMachine, InstructionGenerator as InstrGen
 import Lexer
 from colorama import Fore
 import os
@@ -28,7 +28,7 @@ class SyntaxAnalyzer:
             self.Lexer.write_tokens()  # write lexer tokens to their own file
             self.write_productions()  # write all productions to separate file
             SymbolTable().write_symbols(self.filename, self.args.assembler)
-            VirtualMachine().write_instructions(self.filename, self.args.assembler)
+            InstrGen().write_instructions(self.filename, self.args.assembler)
 
     def write_productions(self):
         fname = (os.path.join(os.path.dirname(self.filename), "syntax_{}".format(os.path.basename(self.filename))))  # prefix syntax to file name
@@ -260,7 +260,7 @@ class SyntaxAnalyzer:
             if self.t_lexeme("="):
                 self.lexer()
                 self.r_Expression()
-                VirtualMachine().generate_instruction('POPM', SymbolTable().get_address(save))
+                InstrGen().generate_instruction('POPM', SymbolTable().get_address(save))
                 if self.t_lexeme(";"):
                     self.lexer()
                     return True
@@ -281,7 +281,7 @@ class SyntaxAnalyzer:
                 if self.t_lexeme(")"):
                     self.lexer()
                     if self.r_Statement():
-                        VirtualMachine().back_patch(VirtualMachine().get_pc())
+                        InstrGen().back_patch(InstrGen().get_pc())
                         self.r_IfPrime()
                         return True
                     else:
@@ -296,11 +296,11 @@ class SyntaxAnalyzer:
     def r_IfPrime(self):
         self.new_production.append("<If Prime>\t-->\tifend  '|'  else  <Statement>  ifend")
         if self.t_lexeme("ifend"):
-            VirtualMachine().generate_instruction('LABEL', None)
+            InstrGen().generate_instruction('LABEL', None)
             self.lexer()
             return
         elif self.t_lexeme("else"):
-            VirtualMachine().generate_instruction('LABEL', None)
+            InstrGen().generate_instruction('LABEL', None)
             self.lexer()
             if self.r_Statement():
                 if self.t_lexeme("ifend"):
@@ -375,8 +375,8 @@ class SyntaxAnalyzer:
     def r_While(self):
         self.new_production.append("<While>\t-->\twhile  (  <Condition>  )  <Statement>  whileend")
         if self.t_lexeme("while"):
-            pc_address = VirtualMachine().get_pc()
-            VirtualMachine().generate_instruction('LABEL', None)
+            pc_address = InstrGen().get_pc()
+            InstrGen().generate_instruction('LABEL', None)
             self.lexer()
             if self.t_lexeme("("):
                 self.lexer()
@@ -384,8 +384,8 @@ class SyntaxAnalyzer:
                 if self.t_lexeme(")"):
                     self.lexer()
                     if self.r_Statement():
-                        VirtualMachine().generate_instruction('JUMP', pc_address)
-                        VirtualMachine().back_patch(VirtualMachine().get_pc())
+                        InstrGen().generate_instruction('JUMP', pc_address)
+                        InstrGen().back_patch(InstrGen().get_pc())
                         if self.t_lexeme("whileend"):
                             self.lexer()
                             return True
@@ -421,21 +421,21 @@ class SyntaxAnalyzer:
         op_tok = self.r_RelationalOperator().lexeme
         self.r_Expression()
         if op_tok == '==':
-            VirtualMachine().generate_instruction('EQU', None)
+            InstrGen().generate_instruction('EQU', None)
         elif op_tok == '^=':
-            VirtualMachine().generate_instruction('NQU', None)
+            InstrGen().generate_instruction('NQU', None)
         elif op_tok == '>':
-            VirtualMachine().generate_instruction('GRT', None)
+            InstrGen().generate_instruction('GRT', None)
         elif op_tok == '<':
-            VirtualMachine().generate_instruction('LES', None)
+            InstrGen().generate_instruction('LES', None)
         elif op_tok == '=>':
-            VirtualMachine().generate_instruction('GEQ', None)
+            InstrGen().generate_instruction('GEQ', None)
         elif op_tok == '=<':
-            VirtualMachine().generate_instruction('LEQ', None)
+            InstrGen().generate_instruction('LEQ', None)
         else:
             pass
-        VirtualMachine().push_jumpstack(VirtualMachine().get_pc())
-        VirtualMachine().generate_instruction('JUMPZ', None)
+        InstrGen().push_jumpstack(InstrGen().get_pc())
+        InstrGen().generate_instruction('JUMPZ', None)
 
     def r_OptDeclarationList(self):
         self.new_production.append("<Optional Declaration List>\t-->\t<Declaration List>  '|'  <Empty>")
@@ -488,12 +488,12 @@ class SyntaxAnalyzer:
         if self.t_lexeme("+"):
             self.lexer()
             self.r_Term()
-            VirtualMachine().generate_instruction('ADD', None)
+            InstrGen().generate_instruction('ADD', None)
             self.r_ExpressionPrime()
         elif self.t_lexeme("-"):
             self.lexer()
             self.r_Term()
-            VirtualMachine().generate_instruction('SUB', None)
+            InstrGen().generate_instruction('SUB', None)
             self.r_ExpressionPrime()
         else:
             self.r_Empty()
@@ -508,12 +508,12 @@ class SyntaxAnalyzer:
         if self.t_lexeme("*"):
             self.lexer()
             self.r_Factor()
-            VirtualMachine().generate_instruction('MUL', None)
+            InstrGen().generate_instruction('MUL', None)
             self.r_TermPrime()
         elif self.t_lexeme('/'):
             self.lexer()
             self.r_Factor()
-            VirtualMachine().generate_instruction('DIV', None)
+            InstrGen().generate_instruction('DIV', None)
             self.r_TermPrime()
         else:
             self.r_Empty()
@@ -529,11 +529,11 @@ class SyntaxAnalyzer:
                                    "  '|'  (  <Expression>  )  '|'  true  '|'  false")
         if self.t_type(TokenInteger) or self.t_type(TokenReal) or self.t_lexeme("true") or self.t_lexeme("false"):
             tok = self.lexer()
-            VirtualMachine().generate_instruction('PUSHI', tok.lexeme)
+            InstrGen().generate_instruction('PUSHI', tok.lexeme)
             return
         elif self.t_type(TokenIdentifier):
             tok = self.lexer()
-            VirtualMachine().generate_instruction('PUSHM', SymbolTable().get_address(tok))
+            InstrGen().generate_instruction('PUSHM', SymbolTable().get_address(tok))
             if self.t_lexeme("("):
                 self.lexer()
                 self.r_Identifiers()

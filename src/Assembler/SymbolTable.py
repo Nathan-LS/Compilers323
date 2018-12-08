@@ -8,7 +8,6 @@ class SymbolTable(metaclass=Singleton):
     def __init__(self, starting_address=5001):
         self.declared_symbol = {}  # key: identifier string, val: type
         self.symbol_table = {}  # key: identifier string, val: memory address
-        self.memory = {}  # key: memory address, val: value
         self.memory_address = starting_address
         self.current_identifier_type = None
 
@@ -43,7 +42,6 @@ class SymbolTable(metaclass=Singleton):
             if self.current_identifier_type is None:  # we are inserting a new variable without declaring the type so raise syntax error
                 raise CompilerExceptions.UndeclaredVariable(identifier)
             self.symbol_table[identifier.lexeme] = self.memory_address  # set key to name of identifier and val to memory location
-            self.memory[self.memory_address] = None  # initially set declared variables to have no value
             self.declared_symbol[identifier.lexeme] = self.current_identifier_type  # set identifier to current type
             self.memory_address += 1  # increment current memory address index
         else:  # identifier already exists in the symbol table
@@ -52,10 +50,9 @@ class SymbolTable(metaclass=Singleton):
 
     def write_symbols(self, filename, console_print=False):
         fname = (os.path.join(os.path.dirname(filename), "symbols_{}".format(os.path.basename(filename))))  # prefix syntax to file name
-        pending_print = ["{:<15} {:<16} {:<8} {:<6}".format('Identifier', 'Memory Location', 'Type', 'Value')]
+        pending_print = ["{:<15} {:<16} {:<8}".format('Identifier', 'Memory Location', 'Type')]
         for key, val in self.symbol_table.items():
-            pending_print.append('{:<15} {:<16} {:<8} {:<6}'.format(key, val, str(self.declared_symbol.get(key)),
-                                                                    str(self.memory.get(val))))
+            pending_print.append('{:<15} {:<16} {:<8}'.format(key, val, str(self.declared_symbol.get(key))))
         with open(fname, 'w') as f:  # open file for write
             for s in pending_print:  # iterate through list of productions used and output to the file
                 f.write(s)
@@ -63,9 +60,6 @@ class SymbolTable(metaclass=Singleton):
                 if console_print:
                     print(s)
             print("Wrote {} symbols to the file: ""'{}'.".format(len(self.symbol_table), fname))
-
-    def store_memory(self, memory_location, value):
-        self.memory[memory_location] = value
 
     def get_address(self, identifier: TokenIdentifier)->int:
         """
