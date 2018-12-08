@@ -5,7 +5,7 @@ from .Singleton import Singleton
 
 
 class SymbolTable(metaclass=Singleton):
-    def __init__(self, starting_address=5000):
+    def __init__(self, starting_address=5001):
         self.declared_symbol = {}  # key: identifier string, val: type
         self.symbol_table = {}  # key: identifier string, val: memory address
         self.memory = {}  # key: memory address, val: value

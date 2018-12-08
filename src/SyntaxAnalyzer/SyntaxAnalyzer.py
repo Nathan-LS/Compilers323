@@ -1,6 +1,6 @@
 from Tokens import *
 from CompilerExceptions import *
-import Assembler
+from Assembler import *
 import Lexer
 from colorama import Fore
 import os
@@ -27,8 +27,8 @@ class SyntaxAnalyzer:
             self.Lexer.finish_iterations()  # obtain remaining tokens within the file
             self.Lexer.write_tokens()  # write lexer tokens to their own file
             self.write_productions()  # write all productions to separate file
-            Assembler.SymbolTable().write_symbols(self.filename, self.args.assembler)
-            Assembler.VirtualMachine().write_instructions(self.filename, self.args.assembler)
+            SymbolTable().write_symbols(self.filename, self.args.assembler)
+            VirtualMachine().write_instructions(self.filename, self.args.assembler)
 
     def write_productions(self):
         fname = (os.path.join(os.path.dirname(self.filename), "syntax_{}".format(os.path.basename(self.filename))))  # prefix syntax to file name
@@ -65,7 +65,8 @@ class SyntaxAnalyzer:
         self.productions_pending_write.append(self.new_production)
         self.new_production = []
         if new_tok.is_type(TokenIdentifier):
-            Assembler.SymbolTable().insert_identifier(new_tok)
+            SymbolTable().insert_identifier(new_tok)
+        return new_tok
 
     def t_lexeme(self, lexeme):  # lexeme check. Peek the next token and check if the given lexeme str matches it.
         try:
@@ -195,7 +196,7 @@ class SyntaxAnalyzer:
     def r_Qualifier(self, flag="None"):
         self.new_production.append("<Qualifier>\t-->\tint  '|'  bool  '|'  real")
         if self.t_lexeme("int") or self.t_lexeme("bool") or self.t_lexeme("real"):
-            Assembler.SymbolTable().set_type(self.Lexer.lexer_peek().lexeme)
+            SymbolTable().set_type(self.Lexer.lexer_peek().lexeme)
             self.lexer()
             return True
         elif flag != "None":
@@ -255,10 +256,11 @@ class SyntaxAnalyzer:
     def r_Assign(self):
         self.new_production.append("<Assign>\t-->\tIDENTIFIER  =  <Expression>  ;")
         if self.t_type(TokenIdentifier):
-            self.lexer()
+            save = self.lexer()
             if self.t_lexeme("="):
                 self.lexer()
                 self.r_Expression()
+                VirtualMachine().generate_instruction('POPM', SymbolTable().get_address(save))
                 if self.t_lexeme(";"):
                     self.lexer()
                     return True
@@ -441,7 +443,7 @@ class SyntaxAnalyzer:
         self.new_production.append("<Declaration>\t-->\t<Qualifier>  <IDs>")
         if self.r_Qualifier("Doesn't need to pass"):
             self.r_Identifiers()
-            Assembler.SymbolTable().reset_type()
+            SymbolTable().reset_type()
             return True
         else:
             return False
@@ -460,9 +462,15 @@ class SyntaxAnalyzer:
 
     def r_ExpressionPrime(self):
         self.new_production.append("<Expression Prime>\t-->\t+  <Term>  <Expression Prime>  '|'  -  <Term>  <Expression Prime>")
-        if self.t_lexeme("+") or self.t_lexeme("-"):
+        if self.t_lexeme("+"):
             self.lexer()
             self.r_Term()
+            VirtualMachine().generate_instruction('ADD', None)
+            self.r_ExpressionPrime()
+        elif self.t_lexeme("-"):
+            self.lexer()
+            self.r_Term()
+            VirtualMachine().generate_instruction('SUB', None)
             self.r_ExpressionPrime()
         else:
             self.r_Empty()
@@ -474,9 +482,15 @@ class SyntaxAnalyzer:
 
     def r_TermPrime(self):
         self.new_production.append("<Term Prime>\t-->\t*  <Factor>  <Term Prime>  '|'  /  <Factor>  <Term Prime>")
-        if self.t_lexeme("*") or self.t_lexeme("/"):
+        if self.t_lexeme("*"):
             self.lexer()
             self.r_Factor()
+            VirtualMachine().generate_instruction('MUL', None)
+            self.r_TermPrime()
+        elif self.t_lexeme('/'):
+            self.lexer()
+            self.r_Factor()
+            VirtualMachine().generate_instruction('DIV', None)
             self.r_TermPrime()
         else:
             self.r_Empty()
@@ -491,10 +505,12 @@ class SyntaxAnalyzer:
         self.new_production.append("<Primary>\t-->\tIDENTIFIER  '|'  INTEGER  '|'  REAL  '|'  Identifier  (  <IDs>  )"
                                    "  '|'  (  <Expression>  )  '|'  true  '|'  false")
         if self.t_type(TokenInteger) or self.t_type(TokenReal) or self.t_lexeme("true") or self.t_lexeme("false"):
-            self.lexer()
+            tok = self.lexer()
+            VirtualMachine().generate_instruction('PUSHI', tok.lexeme)
             return
         elif self.t_type(TokenIdentifier):
-            self.lexer()
+            tok = self.lexer()
+            VirtualMachine().generate_instruction('PUSHM', SymbolTable().get_address(tok))
             if self.t_lexeme("("):
                 self.lexer()
                 self.r_Identifiers()

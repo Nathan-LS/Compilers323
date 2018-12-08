@@ -6,7 +6,7 @@ import os
 class VirtualMachine(metaclass=Singleton):
     def __init__(self):
         self.stack = []
-        self.pc_counter = 0
+        self.pc_counter = 1
         self.pending_instructions = []
 
     def pushi(self, integer_value):
@@ -117,7 +117,13 @@ class VirtualMachine(metaclass=Singleton):
         raise NotImplementedError
 
     def generate_instruction(self, op, oprnd):
-        entry = "{:>4} {:>6} {:>10}".format(self.pc_counter, op, oprnd)
+        if oprnd == 'true':
+            oprnd = 1
+        elif oprnd == 'false':
+            oprnd = 0
+        else:
+            pass
+        entry = "{:<15} {:<16} {:<8}".format(self.pc_counter, op, str(oprnd))
         self.pending_instructions.append(entry)
         self.pc_counter += 1
 
