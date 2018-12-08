@@ -281,6 +281,7 @@ class SyntaxAnalyzer:
                 if self.t_lexeme(")"):
                     self.lexer()
                     if self.r_Statement():
+                        VirtualMachine().back_patch(VirtualMachine().get_pc())
                         self.r_IfPrime()
                         return True
                     else:
@@ -295,9 +296,11 @@ class SyntaxAnalyzer:
     def r_IfPrime(self):
         self.new_production.append("<If Prime>\t-->\tifend  '|'  else  <Statement>  ifend")
         if self.t_lexeme("ifend"):
+            VirtualMachine().generate_instruction('LABEL', None)
             self.lexer()
             return
         elif self.t_lexeme("else"):
+            VirtualMachine().generate_instruction('LABEL', None)
             self.lexer()
             if self.r_Statement():
                 if self.t_lexeme("ifend"):
@@ -372,6 +375,8 @@ class SyntaxAnalyzer:
     def r_While(self):
         self.new_production.append("<While>\t-->\twhile  (  <Condition>  )  <Statement>  whileend")
         if self.t_lexeme("while"):
+            pc_address = VirtualMachine().get_pc()
+            VirtualMachine().generate_instruction('LABEL', None)
             self.lexer()
             if self.t_lexeme("("):
                 self.lexer()
@@ -379,6 +384,8 @@ class SyntaxAnalyzer:
                 if self.t_lexeme(")"):
                     self.lexer()
                     if self.r_Statement():
+                        VirtualMachine().generate_instruction('JUMP', pc_address)
+                        VirtualMachine().back_patch(VirtualMachine().get_pc())
                         if self.t_lexeme("whileend"):
                             self.lexer()
                             return True
@@ -411,8 +418,24 @@ class SyntaxAnalyzer:
     def r_Condition(self):
         self.new_production.append("<Condition>\t-->\t<Expression>  <Relational Operator>  <Expression>")
         self.r_Expression()
-        self.r_RelationalOperator()
+        op_tok = self.r_RelationalOperator().lexeme
         self.r_Expression()
+        if op_tok == '==':
+            VirtualMachine().generate_instruction('EQU', None)
+        elif op_tok == '^=':
+            VirtualMachine().generate_instruction('NQU', None)
+        elif op_tok == '>':
+            VirtualMachine().generate_instruction('GRT', None)
+        elif op_tok == '<':
+            VirtualMachine().generate_instruction('LES', None)
+        elif op_tok == '=>':
+            VirtualMachine().generate_instruction('GEQ', None)
+        elif op_tok == '=<':
+            VirtualMachine().generate_instruction('LEQ', None)
+        else:
+            pass
+        VirtualMachine().push_jumpstack(VirtualMachine().get_pc())
+        VirtualMachine().generate_instruction('JUMPZ', None)
 
     def r_OptDeclarationList(self):
         self.new_production.append("<Optional Declaration List>\t-->\t<Declaration List>  '|'  <Empty>")
@@ -448,10 +471,10 @@ class SyntaxAnalyzer:
         else:
             return False
 
-    def r_RelationalOperator(self):
+    def r_RelationalOperator(self)->TokenBase:
         self.new_production.append("<Relational Operator>\t-->\t==  '|'  ^=  '|'  >  '|'  <  '|'  =>  '|'  =<")
         if self.t_lexeme("==") or self.t_lexeme("^=") or self.t_lexeme(">") or self.t_lexeme("<") or self.t_lexeme("=>") or self.t_lexeme("=<"):
-            self.lexer()
+            return self.lexer()
         else:
             self.raise_syntax_error("Relational Operator")
 
