@@ -64,6 +64,8 @@ class SyntaxAnalyzer:
         self.new_production = [new_tok] + self.new_production
         self.productions_pending_write.append(self.new_production)
         self.new_production = []
+        if new_tok.is_type(TokenIdentifier):
+            Assembler.SymbolTable().insert_identifier(new_tok)
 
     def t_lexeme(self, lexeme):  # lexeme check. Peek the next token and check if the given lexeme str matches it.
         try:
@@ -75,8 +77,6 @@ class SyntaxAnalyzer:
 
     def t_type(self, t_type):  # token type check. Peek next token and check if it's an identifier, relop, etc.
         try:
-            if self.Lexer.lexer_peek().is_type(TokenIdentifier):  # if we get a identifier then make sure to submit to symbol table
-                Assembler.SymbolTable().insert_identifier(self.Lexer.lexer_peek())
             if self.Lexer.lexer_peek().is_type(t_type):
                 return True
             return False

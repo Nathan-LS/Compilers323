@@ -40,12 +40,12 @@ class SymbolTable(metaclass=Singleton):
 
     def insert_identifier(self, identifier: TokenIdentifier)->None:
         if self.symbol_table.get(identifier.lexeme) is None:
+            if self.current_identifier_type is None:  # we are inserting a new variable without declaring the type so raise syntax error
+                raise CompilerExceptions.UndeclaredVariable(identifier)
             self.symbol_table[identifier.lexeme] = self.memory_address  # set key to name of identifier and val to memory location
             self.memory[self.memory_address] = None  # initially set declared variables to have no value
             self.declared_symbol[identifier.lexeme] = self.current_identifier_type  # set identifier to current type
             self.memory_address += 1  # increment current memory address index
-            if self.current_identifier_type is None:  # we are inserting a new variable without declaring the type so raise syntax error
-                raise CompilerExceptions.UndeclaredVariable(identifier)
         else:  # identifier already exists in the symbol table
             if self.current_identifier_type is not None:  # there is currently a deceleration occurring. Raise syntax error for attempting to redeclare the variable
                 raise CompilerExceptions.RedeclaredVariable(identifier)
