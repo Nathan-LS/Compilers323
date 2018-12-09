@@ -14,7 +14,7 @@ class VirtualMachine(metaclass=Singleton):
 
     def pushm(self, memory_location):
         """pushes the value stored at memory location onto TOS"""
-        self.stack.append(memory_location)
+        self.stack.append(self.memory.get(memory_location))
 
     def popm(self, memory_location):
         """pops the value from the TOS and stores it at memory location"""
@@ -24,9 +24,9 @@ class VirtualMachine(metaclass=Singleton):
         """pops the value from TOS and outputs it to the standard output"""
         print(self.stack.pop())
 
-    def stdin(self):  # todo
+    def stdin(self):
         """get the value from the standard input and place it onto the TOS"""
-        raise NotImplementedError
+        self.stack.append(input())
 
     def add(self):
         """pop the first two items from stack and push the sum onto the TOS"""
@@ -107,10 +107,57 @@ class VirtualMachine(metaclass=Singleton):
         if self.stack.pop() == 0:
             self.jump(instruction_location)
 
-    def jump(self, instruction_location):  # todo
+    def jump(self, instruction_location):
         """unconditionally jump to instruction location"""
-        raise NotImplementedError
+        self.pc_counter = instruction_location-1
 
-    def label(self):  # todo
+    def label(self):
         """empty instruction; provides the instruction location to jump to"""
-        raise NotImplementedError
+        pass
+
+    def run_program(self, instructions: list):
+        print('===== Executing Provided Assembly Instructions =====')
+        self.instructions = instructions
+        while self.pc_counter != len(self.instructions)+1:
+            row: dict = self.instructions[self.pc_counter-1]
+            instr = row.get('op')
+            oprnd = row.get('oprnd')
+            if instr == 'PUSHI':
+                self.pushi(int(oprnd))
+            elif instr == 'PUSHM':
+                self.pushm(int(oprnd))
+            elif instr == 'POPM':
+                self.popm(int(oprnd))
+            elif instr == 'STDOUT':
+                self.stdout()
+            elif instr == 'STDIN':
+                self.stdin()
+            elif instr == 'ADD':
+                self.add()
+            elif instr == 'SUB':
+                self.sub()
+            elif instr == 'MUL':
+                self.mul()
+            elif instr == 'DIV':
+                self.div()
+            elif instr == 'GRT':
+                self.grt()
+            elif instr == 'LES':
+                self.les()
+            elif instr == 'EQU':
+                self.equ()
+            elif instr == 'NEQ':
+                self.neq()
+            elif instr == 'GEQ':
+                self.neq()
+            elif instr == 'LEQ':
+                self.leq()
+            elif instr == 'JUMPZ':
+                self.jumpz(int(oprnd))
+            elif instr == 'JUMP':
+                self.jump(int(oprnd))
+            elif instr == 'LABEL':
+                self.label()
+            else:
+                print('Invalid Instruction: {}'.format(instr))
+            self.pc_counter += 1

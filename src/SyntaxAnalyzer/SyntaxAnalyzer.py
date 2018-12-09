@@ -19,8 +19,10 @@ class SyntaxAnalyzer:
         self.new_production = []
 
     def run_analyzer(self):
+        no_error = False
         try:  # entry point to the syntax analyzer
             self.r_Rat18F()  # call the first rule
+            no_error = True
         except CSyntaxError as ex:  # if a syntax error occurs we catch it here and print it to console and file using custom exceptions for lineno/ exepected, etc
             self.print_p(str(ex), color=Fore.RED, force_console=True)  # output buffer add with red text for error message
         finally:  # regardless of errors or success
@@ -29,6 +31,8 @@ class SyntaxAnalyzer:
             self.write_productions()  # write all productions to separate file
             SymbolTable().write_symbols(self.filename, self.args.assembler)
             InstrGen().write_instructions(self.filename, self.args.assembler)
+            if no_error and self.args.run:
+                VirtualMachine().run_program(InstrGen().get_instructions())
 
     def write_productions(self):
         fname = (os.path.join(os.path.dirname(self.filename), "syntax_{}".format(os.path.basename(self.filename))))  # prefix syntax to file name
@@ -343,6 +347,7 @@ class SyntaxAnalyzer:
                     self.lexer()
                     if self.t_lexeme(";"):
                         self.lexer()
+                        InstrGen().generate_instruction('STDOUT', None)
                         return True
                     else:
                         self.raise_syntax_error(";")

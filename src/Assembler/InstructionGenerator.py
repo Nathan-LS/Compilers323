@@ -43,3 +43,6 @@ class InstructionGenerator(metaclass=Singleton):
                 if console_print:
                     print(instr)
             print("Wrote {} instructions to the file: ""'{}'.".format(len(self.pending_instructions), fname))
+
+    def get_instructions(self)->list:
+        return self.pending_instructions

@@ -16,6 +16,8 @@ class Main(object):
                                                  "console.", action="store_true", default=False)
         argp.add_argument("--assembler", "-a", help="Output the symbol table and assembly instructions to the program"
                                                     " console.", action="store_true", default=False)
+        argp.add_argument("--run", "-r", help="Run the compiled program after code generation.", action="store_true",
+                          default=False)
         return argp.parse_args()
 
     @classmethod
