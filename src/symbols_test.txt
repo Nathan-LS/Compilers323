@@ -1,0 +1,4 @@
+Identifier      Memory Location  Type    
+a               5000             int     
+b               5001             int     
+c               5002             int     

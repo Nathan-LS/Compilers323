@@ -1,0 +1,15 @@
+$$
+	int a, b, c;
+	get(a, b, c);
+
+	if(c / 2 == a + 1)
+	{
+		b = c + a;
+	}
+	else
+	{
+		put(a);
+	} ifend
+	put(b);
+	put(c);
+$$
