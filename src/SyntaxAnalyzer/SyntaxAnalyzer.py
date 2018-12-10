@@ -287,7 +287,6 @@ class SyntaxAnalyzer:
                 if self.t_lexeme(")"):
                     self.lexer()
                     if self.r_Statement():
-                        InstrGen().back_patch(InstrGen().get_pc())
                         self.r_IfPrime()
                         return True
                     else:
@@ -302,15 +301,22 @@ class SyntaxAnalyzer:
     def r_IfPrime(self):
         self.new_production.append("<If Prime>\t-->\tifend  '|'  else  <Statement>  ifend")
         if self.t_lexeme("ifend"):
+            InstrGen().back_patch(InstrGen().get_pc())
             InstrGen().generate_instruction('LABEL', None)
             self.lexer()
             return
         elif self.t_lexeme("else"):
+            InstrGen().back_patch(InstrGen().get_pc())
+            InstrGen().generate_instruction('PUSHI', 0)
+            InstrGen().push_jumpstack(InstrGen().get_pc())
+            InstrGen().generate_instruction('JUMPZ', None)
             InstrGen().generate_instruction('LABEL', None)
             self.lexer()
             if self.r_Statement():
                 if self.t_lexeme("ifend"):
                     self.lexer()
+                    InstrGen().back_patch(InstrGen().get_pc())
+                    InstrGen().generate_instruction('LABEL', None)
                     return
                 else:
                     self.raise_syntax_error("ifend")
