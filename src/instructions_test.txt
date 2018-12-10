@@ -18,8 +18,8 @@ Address         OP               Oprnd
 17              ADD             
 18              POPM             5001    
 19              PUSHI            0       
-20              JUMPZ           
-21              LABEL            24      
+20              JUMPZ            24      
+21              LABEL           
 22              PUSHM            5000    
 23              STDOUT          
 24              LABEL           

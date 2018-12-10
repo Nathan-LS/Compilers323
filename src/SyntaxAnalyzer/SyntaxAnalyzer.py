@@ -306,10 +306,10 @@ class SyntaxAnalyzer:
             self.lexer()
             return
         elif self.t_lexeme("else"):
+            InstrGen().back_patch(InstrGen().get_pc() + 2)
             InstrGen().generate_instruction('PUSHI', 0)
-            InstrGen().generate_instruction('JUMPZ', None)
-            InstrGen().back_patch(InstrGen().get_pc())
             InstrGen().push_jumpstack(InstrGen().get_pc())
+            InstrGen().generate_instruction('JUMPZ', None)
             InstrGen().generate_instruction('LABEL', None)
             self.lexer()
             if self.r_Statement():
