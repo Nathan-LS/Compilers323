@@ -115,6 +115,7 @@ class SyntaxAnalyzer:
         except StopIteration:  # eof indicating pass of the Rat18R rule with no tokens remaining
             self.print_p("Success! There are no syntax errors here! :)", color=Fore.GREEN, force_console=True)
 
+    '''     Not included with Rat18F Simplified.
     def r_OptFunctionDefinitions(self):
         self.new_production.append("<Opt Function Definitions>\t-->\t<Function Definitions>  '|'  <Empty>")
         if self.r_FunctionDefinitions():
@@ -158,7 +159,7 @@ class SyntaxAnalyzer:
             else:
                 self.raise_syntax_error("Identifier")
         return False
-
+        
     def r_OptParameterList(self):
         self.new_production.append("<Optional Parameter List>\t-->\t<Parameter List>  '|'  <Empty>")
         if self.r_ParameterList():
@@ -197,17 +198,6 @@ class SyntaxAnalyzer:
         else:
             return False
 
-    def r_Qualifier(self, flag="None"):
-        self.new_production.append("<Qualifier>\t-->\tint  '|'  bool  '|'  real")
-        if self.t_lexeme("int") or self.t_lexeme("bool") or self.t_lexeme("real"):
-            SymbolTable().set_type(self.Lexer.lexer_peek().lexeme)
-            self.lexer()
-            return True
-        elif flag != "None":
-            return False
-        else:
-            self.raise_syntax_error("Qualifier [int, bool, real]")
-
     def r_Body(self):
         self.new_production.append("<Body>\t-->\t{  <Statement List>  }")
         if self.t_lexeme("{"):
@@ -220,6 +210,18 @@ class SyntaxAnalyzer:
                 self.raise_syntax_error("}")
         else:
             self.raise_syntax_error("{")
+    '''
+
+    def r_Qualifier(self, flag="None"):
+        self.new_production.append("<Qualifier>\t-->\tint  '|'  boolean  '|'  real")
+        if self.t_lexeme("int") or self.t_lexeme("boolean") or self.t_lexeme("real"):
+            SymbolTable().set_type(self.Lexer.lexer_peek().lexeme)
+            self.lexer()
+            return True
+        elif flag != "None":
+            return False
+        else:
+            self.raise_syntax_error("Qualifier [int, boolean, real]")
 
     def r_StatementList(self, flag="None"):
         self.new_production.append("<Statement List>\t-->\t<Statement>  <Statement List Prime>")
@@ -363,7 +365,7 @@ class SyntaxAnalyzer:
             self.lexer()
             if self.t_lexeme("("):
                 self.lexer()
-                self.r_Identifiers()
+                self.r_Identifiers(flag='Scan')
                 if self.t_lexeme(")"):
                     self.lexer()
                     if self.t_lexeme(";"):
@@ -404,19 +406,22 @@ class SyntaxAnalyzer:
                 self.raise_syntax_error("(")
         return False
 
-    def r_Identifiers(self):
+    def r_Identifiers(self, flag=None):
         self.new_production.append("<IDs>\t-->\tIDENTIFIER  <IDs Prime>")
         if self.t_type(TokenIdentifier):
-            self.lexer()
-            self.r_IdentifiersPrime()
+            save = self.lexer()
+            if flag == 'Scan':
+                InstrGen().generate_instruction('STDIN', None)
+                InstrGen().generate_instruction('POPM', SymbolTable().get_address(save))
+            self.r_IdentifiersPrime(flagPrime=flag)
         else:
             self.raise_syntax_error("Identifier")
 
-    def r_IdentifiersPrime(self):
+    def r_IdentifiersPrime(self, flagPrime=None):
         self.new_production.append("<IDs Prime>\t-->\t,  <IDs>  '|'  <Empty>")
         if self.t_lexeme(","):
             self.lexer()
-            self.r_Identifiers()
+            self.r_Identifiers(flag=flagPrime)
         else:
             self.r_Empty()
 

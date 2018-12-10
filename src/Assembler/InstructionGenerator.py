@@ -34,11 +34,14 @@ class InstructionGenerator(metaclass=Singleton):
         fname = (os.path.join(os.path.dirname(filename), "instructions_{}".format(os.path.basename(filename))))  # prefix syntax to file name
         header = "{:<15} {:<16} {:<8}".format('Address', 'OP', 'Oprnd')
         with open(fname, 'w') as f:  # open file for write
-            f.write(header)
+            f.write(header + '\n')
             if console_print:
                 print(header)
             for s in self.pending_instructions:
-                instr = "{:<15} {:<16} {:<8}".format(s.get('addr'), s.get('op'), s.get('oprnd'))
+                if s.get('oprnd') == "None":
+                    instr = "{:<15} {:<16}".format(s.get('addr'), s.get('op'))
+                else:
+                    instr = "{:<15} {:<16} {:<8}".format(s.get('addr'), s.get('op'), s.get('oprnd'))
                 f.write(instr + '\n')
                 if console_print:
                     print(instr)
