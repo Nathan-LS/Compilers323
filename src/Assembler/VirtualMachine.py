@@ -1,7 +1,6 @@
-from .Singleton import Singleton
 
 
-class VirtualMachine(metaclass=Singleton):
+class VirtualMachine(object):
     def __init__(self):
         self.stack = []
         self.pc_counter = 1

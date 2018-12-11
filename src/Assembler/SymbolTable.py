@@ -1,10 +1,9 @@
 import CompilerExceptions
 import os
 from Tokens import TokenIdentifier
-from .Singleton import Singleton
 
 
-class SymbolTable(metaclass=Singleton):
+class SymbolTable(object):
     def __init__(self, starting_address=5000):
         self.declared_symbol = {}  # key: identifier string, val: type
         self.symbol_table = {}  # key: identifier string, val: memory address

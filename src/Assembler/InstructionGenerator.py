@@ -1,8 +1,7 @@
-from .Singleton import Singleton
 import os
 
 
-class InstructionGenerator(metaclass=Singleton):
+class InstructionGenerator(object):
     def __init__(self):
         self.pc_counter = 1
         self.jump_stack = []
