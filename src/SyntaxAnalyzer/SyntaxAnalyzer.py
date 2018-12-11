@@ -216,10 +216,12 @@ class SyntaxAnalyzer:
 
     def r_Qualifier(self, flag="None"):
         self.new_production.append("<Qualifier>\t-->\tint  '|'  boolean  '|'  real")
-        if self.t_lexeme("int") or self.t_lexeme("boolean") or self.t_lexeme("real"):
+        if self.t_lexeme("int") or self.t_lexeme("boolean"):
             self.symbol_table.set_type(self.Lexer.lexer_peek().lexeme)
             self.lexer()
             return True
+        elif self.t_lexeme("real"):
+            raise InvalidDeclareReal(self.Lexer.lexer_peek())
         elif flag != "None":
             return False
         else:
@@ -268,6 +270,8 @@ class SyntaxAnalyzer:
             if self.t_lexeme("="):
                 self.lexer()
                 self.r_Expression()
+                if self.symbol_table.identifier_type(save) == 'boolean':
+                    self.instruction_generator.bool_assignment_check(save)
                 self.instruction_generator.generate_instruction('POPM', self.symbol_table.get_address(save))
                 if self.t_lexeme(";"):
                     self.lexer()
@@ -440,7 +444,7 @@ class SyntaxAnalyzer:
         if op_tok == '==':
             self.instruction_generator.generate_instruction('EQU', None)
         elif op_tok == '^=':
-            self.instruction_generator.generate_instruction('NQU', None)
+            self.instruction_generator.generate_instruction('NEQ', None)
         elif op_tok == '>':
             self.instruction_generator.generate_instruction('GRT', None)
         elif op_tok == '<':

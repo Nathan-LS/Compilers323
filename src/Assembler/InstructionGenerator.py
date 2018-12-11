@@ -1,4 +1,5 @@
 import os
+import CompilerExceptions
 
 
 class InstructionGenerator(object):
@@ -48,3 +49,13 @@ class InstructionGenerator(object):
 
     def get_instructions(self)->list:
         return self.pending_instructions
+
+    def bool_assignment_check(self, bool_identifier):
+        """check if top of stack can be assigned to bool"""
+        length = len(self.pending_instructions)
+        if length > 0:
+            val = self.pending_instructions[length-1].get('oprnd')
+            if val != '1' and val != '0':
+                raise CompilerExceptions.InvalidBoolAssign(bool_identifier)
+        else:
+            raise CompilerExceptions.InvalidBoolAssign(bool_identifier)

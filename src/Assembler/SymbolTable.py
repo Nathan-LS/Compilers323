@@ -21,6 +21,9 @@ class SymbolTable(object):
         else:
             return True
 
+    def identifier_type(self, identifier: TokenIdentifier)->str:
+        return self.declared_symbol.get(identifier.lexeme)
+
     def set_type(self, token_type: str):
         """
         set the toke type by passing in the string of a type. Ex: int, bool, etc

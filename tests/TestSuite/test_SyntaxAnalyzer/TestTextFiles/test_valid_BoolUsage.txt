@@ -1,0 +1,8 @@
+$$
+boolean a, b ,c;
+int v;
+a = true;
+b = false;
+c = true;
+v = 1;
+$$

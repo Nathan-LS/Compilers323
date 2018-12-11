@@ -25,6 +25,17 @@ class CSyntaxError(CompilerExceptions):
         return msg
 
 
+class InvalidDeclareReal(CSyntaxError):
+    def get_message(self):
+        return "Error on line {}. Unable to declare real.".format(self.token.line)
+
+
+class InvalidBoolAssign(CSyntaxError):
+    def get_message(self):
+        return "Error on line {}. Unable to assign value to bool other than true (1) or false (0)." \
+               "".format(self.token.line)
+
+
 class UndeclaredVariable(CSyntaxError):
     def get_message(self):
         return "Error on line {}. Use of an undeclared variable: '{}'.".format(self.token.line, self.token.lexeme)

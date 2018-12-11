@@ -23,6 +23,7 @@ class TestSyntaxAnalyzer(unittest.TestCase):
     def helper_invalid_files(self):
         yield {'file': 'test_invalid_P2_nested_undec.txt', 'line': 3, 'exp': None}
         yield {'file': 'test_invalid_Undeclared.txt', 'line': 9, 'exp': None}
+        yield {'file': 'test_invalid_DelcareReal.txt', 'line': 3, 'exp': None}
 
     def helper_run_valid(self, file_path):
         sys.argv.extend(['-i', file_path])
