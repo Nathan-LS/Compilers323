@@ -9,20 +9,24 @@ import sys
 class TestSyntaxAnalyzer(unittest.TestCase):
     def setUp(self):
         self.test_files = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'TestTextFiles')
+        p_dir = os.path.join(os.path.abspath(__file__), os.pardir, os.pardir)
+        self.valid_test_files_instrgen = os.path.join(p_dir, 'test_InstructionGeneration', 'TestTextFiles')
 
     def helper_valid_files(self):
         for f in os.listdir(self.test_files):
             if f.startswith('test_valid_'):
-                yield f
+                yield os.path.join(self.test_files, f)
+        for f in os.listdir(self.valid_test_files_instrgen):
+            if f.startswith('test_'):
+                yield os.path.join(self.valid_test_files_instrgen, f)
 
     def helper_invalid_files(self):
         yield {'file': 'test_invalid_P2_nested_undec.txt', 'line': 3, 'exp': None}
         yield {'file': 'test_invalid_Undeclared.txt', 'line': 9, 'exp': None}
 
-    def helper_run_valid(self, filename):
-        input_path = os.path.join(self.test_files, filename)
-        sys.argv.extend(['-i', input_path])
-        with open(input_path, 'r') as input_file:
+    def helper_run_valid(self, file_path):
+        sys.argv.extend(['-i', file_path])
+        with open(file_path, 'r') as input_file:
             sa = SyntaxAnalyzer(input_file, Main.get_args())
             sa.r_Rat18F()
 
@@ -40,10 +44,10 @@ class TestSyntaxAnalyzer(unittest.TestCase):
 
     def test_rat18f(self):
         for valid_file in self.helper_valid_files():
-            with self.subTest(file_type='Valid', file_name=valid_file):
+            with self.subTest(file_name=valid_file, file_type='Valid'):
                 self.helper_run_valid(valid_file)
         for invalid_file in self.helper_invalid_files():
-            with self.subTest(file_type='Invalid', file_name=invalid_file):
+            with self.subTest(file_name=invalid_file, file_type='Invalid'):
                 self.helper_run_invalid(invalid_file['file'], invalid_file['line'], invalid_file['exp'])
 
     def tearDown(self):

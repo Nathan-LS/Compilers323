@@ -1,0 +1,28 @@
+Address         OP               Oprnd   
+1               STDIN           
+2               POPM             5000    
+3               STDIN           
+4               POPM             5001    
+5               STDIN           
+6               POPM             5002    
+7               PUSHM            5002    
+8               PUSHI            2       
+9               DIV             
+10              PUSHM            5000    
+11              PUSHI            1       
+12              ADD             
+13              EQU             
+14              JUMPZ            21      
+15              PUSHM            5002    
+16              PUSHM            5000    
+17              ADD             
+18              POPM             5001
+19              JUMP             23
+20              LABEL
+21              PUSHM            5000
+22              STDOUT
+23              LABEL
+24              PUSHM            5001
+25              STDOUT
+26              PUSHM            5002
+27              STDOUT
