@@ -1,0 +1,15 @@
+$$
+int a, b, c;
+a = 0;
+b =1;
+c = 2;
+if (a ^= b){
+while (a ^= c){
+        put(a);
+        a = a + 1;
+    }whileend
+}
+else{
+put(c);
+}ifend
+$$

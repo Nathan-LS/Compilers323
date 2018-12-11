@@ -1,0 +1,66 @@
+$$
+	int a, b, c;
+	boolean test, variables, dummyVar;
+	dummyVar = false;
+	
+	get(c, a, test);
+	{
+		if(c / 2 == a + 1)
+		{
+			variables = false;
+		}
+		else
+		{
+			if(c == a + 2)
+			{
+				variables = true;
+			}
+			else
+			{
+				dummyVar = true;
+			} ifend
+		} ifend
+		if (dummyVar == 0)
+		{
+			put(variables);
+		} ifend
+		
+		get(b);
+		if(b < a)
+		{
+			while(b < a)
+			{
+				b = b + 1;
+			} whileend
+		}
+		else
+		{
+			if(b > a)
+			{
+				while(b > a)
+				{
+				get(test,variables, dummyVar);
+				get(test,variables, dummyVar);
+				get(test,variables, dummyVar);
+				get(test,variables, dummyVar);
+				put(test);
+					b = b - 1;
+				} whileend
+			}
+			else
+			{
+				b = a * 10;
+			} ifend
+			
+		} ifend
+	}
+	put(a);
+	put(b);
+	get(test,variables, dummyVar);
+	put(c);
+	put(a+b+c);
+	put(a/b*c);
+	put(a*b/c);
+	put(a-b+c);
+	put(test);
+$$

@@ -1,0 +1,26 @@
+$$
+int a, b, c, d;
+d = 1;
+a = 1;
+b =1;
+c = 2;
+if (a ^= b){
+while (a ^= c){
+        put(a);
+        a = a + 1;
+    }whileend
+}
+else{
+    put(c);
+    if (a == 1){
+        put(25);
+    }ifend
+    a = a *a;
+    while (d =< 25){
+        put(d);
+        d = (a * d) * 2;
+    }whileend
+
+}ifend
+put(15);
+$$

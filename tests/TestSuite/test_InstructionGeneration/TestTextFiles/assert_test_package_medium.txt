@@ -1,0 +1,57 @@
+Address         OP               Oprnd   
+1               PUSHI            1       
+2               POPM             5003    
+3               PUSHI            1       
+4               POPM             5000    
+5               PUSHI            1       
+6               POPM             5001    
+7               PUSHI            2       
+8               POPM             5002    
+9               PUSHM            5000    
+10              PUSHM            5001    
+11              NEQ             
+12              JUMPZ            27      
+13              LABEL           
+14              PUSHM            5000    
+15              PUSHM            5002    
+16              NEQ             
+17              JUMPZ            25      
+18              PUSHM            5000    
+19              STDOUT          
+20              PUSHM            5000    
+21              PUSHI            1       
+22              ADD             
+23              POPM             5000    
+24              JUMP             13      
+25              JUMP             54      
+26              LABEL           
+27              PUSHM            5002    
+28              STDOUT          
+29              PUSHM            5000    
+30              PUSHI            1       
+31              EQU             
+32              JUMPZ            35      
+33              PUSHI            25      
+34              STDOUT          
+35              LABEL           
+36              PUSHM            5000    
+37              PUSHM            5000    
+38              MUL             
+39              POPM             5000    
+40              LABEL           
+41              PUSHM            5003    
+42              PUSHI            25      
+43              LEQ             
+44              JUMPZ            54      
+45              PUSHM            5003    
+46              STDOUT          
+47              PUSHM            5000    
+48              PUSHM            5003    
+49              MUL             
+50              PUSHI            2       
+51              MUL             
+52              POPM             5003    
+53              JUMP             40      
+54              LABEL           
+55              PUSHI            15      
+56              STDOUT          

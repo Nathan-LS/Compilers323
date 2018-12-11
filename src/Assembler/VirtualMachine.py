@@ -25,7 +25,7 @@ class VirtualMachine(object):
 
     def stdin(self):
         """get the value from the standard input and place it onto the TOS"""
-        self.stack.append(input())
+        self.stack.append(int(input()))
 
     def add(self):
         """pop the first two items from stack and push the sum onto the TOS"""

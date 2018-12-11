@@ -1,0 +1,114 @@
+Address         OP               Oprnd   
+1               PUSHI            0       
+2               POPM             5005    
+3               STDIN           
+4               POPM             5002    
+5               STDIN           
+6               POPM             5000    
+7               STDIN           
+8               POPM             5003    
+9               PUSHM            5002    
+10              PUSHI            2       
+11              DIV             
+12              PUSHM            5000    
+13              PUSHI            1       
+14              ADD             
+15              EQU             
+16              JUMPZ            21      
+17              PUSHI            0       
+18              POPM             5004    
+19              JUMP             34      
+20              LABEL           
+21              PUSHM            5002    
+22              PUSHM            5000    
+23              PUSHI            2       
+24              ADD             
+25              EQU             
+26              JUMPZ            31      
+27              PUSHI            1       
+28              POPM             5004    
+29              JUMP             33      
+30              LABEL           
+31              PUSHI            1       
+32              POPM             5005    
+33              LABEL           
+34              LABEL           
+35              PUSHM            5005    
+36              PUSHI            0       
+37              EQU             
+38              JUMPZ            41      
+39              PUSHM            5004    
+40              STDOUT          
+41              LABEL           
+42              STDIN           
+43              POPM             5001    
+44              PUSHM            5001    
+45              PUSHM            5000    
+46              LES             
+47              JUMPZ            60      
+48              LABEL           
+49              PUSHM            5001    
+50              PUSHM            5000    
+51              LES             
+52              JUMPZ            58      
+53              PUSHM            5001    
+54              PUSHI            1       
+55              ADD             
+56              POPM             5001    
+57              JUMP             48      
+58              JUMP             81      
+59              LABEL           
+60              PUSHM            5001    
+61              PUSHM            5000    
+62              GRT             
+63              JUMPZ            76      
+64              LABEL           
+65              PUSHM            5001    
+66              PUSHM            5000    
+67              GRT             
+68              JUMPZ            74      
+69              PUSHM            5001    
+70              PUSHI            1       
+71              SUB             
+72              POPM             5001    
+73              JUMP             64      
+74              JUMP             80      
+75              LABEL           
+76              PUSHM            5000    
+77              PUSHI            10      
+78              MUL             
+79              POPM             5001    
+80              LABEL           
+81              LABEL           
+82              PUSHM            5000    
+83              STDOUT          
+84              PUSHM            5001    
+85              STDOUT          
+86              PUSHM            5002    
+87              STDOUT          
+88              PUSHM            5000    
+89              PUSHM            5001    
+90              ADD             
+91              PUSHM            5002    
+92              ADD             
+93              STDOUT          
+94              PUSHM            5000    
+95              PUSHM            5001    
+96              DIV             
+97              PUSHM            5002    
+98              MUL             
+99              STDOUT          
+100             PUSHM            5000    
+101             PUSHM            5001    
+102             MUL             
+103             PUSHM            5002    
+104             DIV             
+105             STDOUT          
+106             PUSHM            5000    
+107             PUSHM            5001    
+108             SUB             
+109             PUSHM            5002    
+110             ADD             
+111             STDOUT          
+112             PUSHM            5003    
+113             STDOUT          
