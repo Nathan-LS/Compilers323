@@ -508,11 +508,17 @@ class SyntaxAnalyzer:
         self.new_production.append("<Expression Prime>\t-->\t+  <Term>  <Expression Prime>  '|'  -  <Term>  <Expression Prime>")
         if self.t_lexeme("+"):
             self.lexer()
+            bool_safe = self.Lexer.lexer_peek()
+            if self.symbol_table.identifier_type(bool_safe) == 'boolean' or bool_safe.lexeme == 'true' or bool_safe.lexeme == 'false':
+                raise InvalidBoolUsage(bool_safe)
             self.r_Term()
             self.instruction_generator.generate_instruction('ADD', None)
             self.r_ExpressionPrime()
         elif self.t_lexeme("-"):
             self.lexer()
+            bool_safe = self.Lexer.lexer_peek()
+            if self.symbol_table.identifier_type(bool_safe) == 'boolean' or bool_safe.lexeme == 'true' or bool_safe.lexeme == 'false':
+                raise InvalidBoolUsage(bool_safe)
             self.r_Term()
             self.instruction_generator.generate_instruction('SUB', None)
             self.r_ExpressionPrime()
@@ -528,11 +534,17 @@ class SyntaxAnalyzer:
         self.new_production.append("<Term Prime>\t-->\t*  <Factor>  <Term Prime>  '|'  /  <Factor>  <Term Prime>")
         if self.t_lexeme("*"):
             self.lexer()
+            bool_safe = self.Lexer.lexer_peek()
+            if self.symbol_table.identifier_type(bool_safe) == 'boolean' or bool_safe.lexeme == 'true' or bool_safe.lexeme == 'false':
+                raise InvalidBoolUsage(bool_safe)
             self.r_Factor()
             self.instruction_generator.generate_instruction('MUL', None)
             self.r_TermPrime()
         elif self.t_lexeme('/'):
             self.lexer()
+            bool_safe = self.Lexer.lexer_peek()
+            if self.symbol_table.identifier_type(bool_safe) == 'boolean' or bool_safe.lexeme == 'true' or bool_safe.lexeme == 'false':
+                raise InvalidBoolUsage(bool_safe)
             self.r_Factor()
             self.instruction_generator.generate_instruction('DIV', None)
             self.r_TermPrime()
@@ -543,6 +555,9 @@ class SyntaxAnalyzer:
         self.new_production.append("<Factor>\t-->\t-  <Primary>  '|'  <Primary>")
         if self.t_lexeme("-"):
             self.lexer()
+            bool_safe = self.Lexer.lexer_peek()
+            if self.symbol_table.identifier_type(bool_safe) == 'boolean' or bool_safe.lexeme == 'true' or bool_safe.lexeme == 'false':
+                raise InvalidBoolUsage(bool_safe)
         self.r_Primary()
 
     def r_Primary(self):
@@ -550,10 +565,14 @@ class SyntaxAnalyzer:
                                    "  '|'  (  <Expression>  )  '|'  true  '|'  false")
         if self.t_type(TokenInteger) or self.t_type(TokenReal) or self.t_lexeme("true") or self.t_lexeme("false"):
             tok = self.lexer()
+            if (tok.lexeme == "true" or tok.lexeme == "false") and self.t_type(TokenOperator):
+                raise InvalidBoolUsage(tok)
             self.instruction_generator.generate_instruction('PUSHI', tok.lexeme)
             return
         elif self.t_type(TokenIdentifier):
             tok = self.lexer()
+            if self.symbol_table.identifier_type(tok)=='boolean' and self.t_type(TokenOperator):
+                raise InvalidBoolUsage(tok)
             self.instruction_generator.generate_instruction('PUSHM', self.symbol_table.get_address(tok))
             if self.t_lexeme("("):
                 self.lexer()

@@ -30,9 +30,9 @@ class InvalidDeclareReal(CSyntaxError):
         return "Error on line {}. Unable to declare real.".format(self.token.line)
 
 
-class InvalidBoolAssign(CSyntaxError):
+class InvalidBoolUsage(CSyntaxError):
     def get_message(self):
-        return "Error on line {}. Unable to assign value to bool other than true (1) or false (0)." \
+        return "Error on line {}. Unable to assign value to bool other than true (1) or false (0). Unable to do arithmetic operations on bool values." \
                "".format(self.token.line)
 
 

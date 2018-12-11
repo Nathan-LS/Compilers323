@@ -56,6 +56,6 @@ class InstructionGenerator(object):
         if length > 0:
             val = self.pending_instructions[length-1].get('oprnd')
             if val != '1' and val != '0':
-                raise CompilerExceptions.InvalidBoolAssign(bool_identifier)
+                raise CompilerExceptions.InvalidBoolUsage(bool_identifier)
         else:
-            raise CompilerExceptions.InvalidBoolAssign(bool_identifier)
+            raise CompilerExceptions.InvalidBoolUsage(bool_identifier)
