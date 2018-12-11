@@ -1,7 +1,9 @@
 $$
 boolean a, b ,c;
 int v;
-v = 1 + 5 + 6 + c;
+a = true;
+b = false;
+c = a +b;
 
 
 

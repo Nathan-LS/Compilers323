@@ -1,0 +1,15 @@
+$$
+	boolean a;
+	int b;
+	a = true;
+	b = 3;
+	a = false;
+	put(a);
+	if (a == 6){
+		get(b);
+	}
+	else
+	{
+		put(b);
+	} ifend
+$$

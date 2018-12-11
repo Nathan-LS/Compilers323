@@ -24,8 +24,8 @@ class TestSyntaxAnalyzer(unittest.TestCase):
         yield {'file': 'test_invalid_P2_nested_undec.txt', 'line': 3, 'exp': None}
         yield {'file': 'test_invalid_Undeclared.txt', 'line': 9, 'exp': None}
         yield {'file': 'test_invalid_DelcareReal.txt', 'line': 3, 'exp': None}
-        yield {'file': 'test_invalid_BoolUsage.txt', 'line': 10, 'exp': None}
-        yield {'file': 'test_invalid_Long_Bool.txt', 'line': 62, 'exp': None}
+        yield {'file': 'test_invalid_BoolUsage.txt', 'line': 6, 'exp': None}
+        yield {'file': 'test_invalid_Long_Bool.txt', 'line': 42, 'exp': None}
 
     def helper_run_valid(self, file_path):
         sys.argv.extend(['-i', file_path])

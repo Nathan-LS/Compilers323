@@ -14,7 +14,7 @@ Address         OP               Oprnd
 13              PUSHI            1       
 14              ADD             
 15              EQU             
-16              JUMPZ            21      
+16              JUMPZ            20      
 17              PUSHI            0       
 18              POPM             5004    
 19              JUMP             34      
@@ -24,7 +24,7 @@ Address         OP               Oprnd
 23              PUSHI            2       
 24              ADD             
 25              EQU             
-26              JUMPZ            31      
+26              JUMPZ            30      
 27              PUSHI            1       
 28              POPM             5004    
 29              JUMP             33      
@@ -45,7 +45,7 @@ Address         OP               Oprnd
 44              PUSHM            5001    
 45              PUSHM            5000    
 46              LES             
-47              JUMPZ            60      
+47              JUMPZ            59      
 48              LABEL           
 49              PUSHM            5001    
 50              PUSHM            5000    
@@ -61,7 +61,7 @@ Address         OP               Oprnd
 60              PUSHM            5001    
 61              PUSHM            5000    
 62              GRT             
-63              JUMPZ            76      
+63              JUMPZ            75      
 64              LABEL           
 65              PUSHM            5001    
 66              PUSHM            5000    

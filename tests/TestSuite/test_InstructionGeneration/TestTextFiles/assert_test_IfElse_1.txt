@@ -12,17 +12,17 @@ Address         OP               Oprnd
 11              PUSHI            1       
 12              ADD             
 13              EQU             
-14              JUMPZ            21      
+14              JUMPZ            20      
 15              PUSHM            5002    
 16              PUSHM            5000    
 17              ADD             
-18              POPM             5001
-19              JUMP             23
-20              LABEL
-21              PUSHM            5000
-22              STDOUT
-23              LABEL
-24              PUSHM            5001
-25              STDOUT
-26              PUSHM            5002
-27              STDOUT
+18              POPM             5001    
+19              JUMP             23      
+20              LABEL           
+21              PUSHM            5000    
+22              STDOUT          
+23              LABEL           
+24              PUSHM            5001    
+25              STDOUT          
+26              PUSHM            5002    
+27              STDOUT          

@@ -10,7 +10,7 @@ Address         OP               Oprnd
 9               PUSHM            5000    
 10              PUSHM            5001    
 11              NEQ             
-12              JUMPZ            27      
+12              JUMPZ            26      
 13              LABEL           
 14              PUSHM            5000    
 15              PUSHM            5002    
