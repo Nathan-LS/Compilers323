@@ -1,11 +1,12 @@
 import unittest
 from src.__main__ import Main as srcMain
 from src.SyntaxAnalyzer import SyntaxAnalyzer
+from src.Assembler import InstructionGenerator
 import os
 import sys
 
 
-class InstructionGeneration(unittest.TestCase):
+class TestInstructionGeneration(unittest.TestCase):
     def setUp(self):
         self.test_files = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'TestTextFiles')
 
@@ -32,6 +33,21 @@ class InstructionGeneration(unittest.TestCase):
         for f in self.helper_test_files():
             with self.subTest(filename=f):
                 self.helper_run(f)
+
+    def test_jump_stack_whileloop(self):
+        ig = InstructionGenerator()
+        for i in range(5):
+            ig.generate_instruction('None', None)
+        start_addr = ig.get_pc()
+        ig.generate_instruction('LES', None)
+        ig.push_jumpstack(ig.get_pc())  # 6
+        ig.generate_instruction('JUMPZ', None)
+        for i in range(10):  # simulate while loop
+            ig.generate_instruction('None', None)
+        ig.generate_instruction('JUMP', start_addr)
+        ig.back_patch(ig.get_pc())
+        self.assertEqual(str(ig.pending_instructions[6].get('oprnd')), "19")  # jumpz 19 if les fails /end of while loop
+        self.assertEqual(str(ig.pending_instructions[17].get('oprnd')), "6")  # jmp 6/start of while loop
 
     def tearDown(self):
         for file in os.listdir(self.test_files):

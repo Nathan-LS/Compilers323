@@ -1,0 +1,13 @@
+
+$$
+
+     int    low,  high, step;
+
+     get (low, high, step);
+     while (low  <  high )
+         {  put (low-high+high+1+1.5);
+             put (convert1x (low)+2);
+             low =  low  +  step * 3 + (4 - low);
+         }
+      whileend
+$$

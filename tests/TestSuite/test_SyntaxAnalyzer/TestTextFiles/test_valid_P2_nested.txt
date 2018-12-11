@@ -1,0 +1,30 @@
+
+$$
+int a;
+while( a => 5){
+while( a => 5){
+    if ( a ^= 5){
+        put(a);
+    }
+    else{
+    if ( a ^= 5){
+        put(a);
+    if ( a ^= 5){
+        put(a);
+    if ( a ^= 5){
+        put(a);
+        if ( a ^= 5){
+        put(a);
+    }else{
+    a = 6;
+    }ifend
+    }ifend
+    }ifend
+    }ifend
+        a = 5;
+        put(a + 5 + (10/5) - 2);
+    }ifend
+
+}whileend
+}whileend
+$$
