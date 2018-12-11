@@ -1,0 +1,7 @@
+Address         OP               Oprnd   
+1               PUSHI            -1      
+2               PUSHI            1       
+3               MUL             
+4               PUSHI            1       
+5               ADD             
+6               POPM             5000    

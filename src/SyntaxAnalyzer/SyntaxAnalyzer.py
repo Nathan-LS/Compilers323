@@ -553,12 +553,18 @@ class SyntaxAnalyzer:
 
     def r_Factor(self):
         self.new_production.append("<Factor>\t-->\t-  <Primary>  '|'  <Primary>")
+        dummyVar = False
         if self.t_lexeme("-"):
+            dummyVar = True
             self.lexer()
+            self.instruction_generator.generate_instruction('PUSHI', -1)
             bool_safe = self.Lexer.lexer_peek()
-            if self.symbol_table.identifier_type(bool_safe) == 'boolean' or bool_safe.lexeme == 'true' or bool_safe.lexeme == 'false':
+            if self.symbol_table.identifier_type(
+                    bool_safe) == 'boolean' or bool_safe.lexeme == 'true' or bool_safe.lexeme == 'false':
                 raise InvalidBoolUsage(bool_safe)
         self.r_Primary()
+        if dummyVar:
+            self.instruction_generator.generate_instruction('MUL', None)
 
     def r_Primary(self):
         self.new_production.append("<Primary>\t-->\tIDENTIFIER  '|'  INTEGER  '|'  REAL  '|'  Identifier  (  <IDs>  )"
