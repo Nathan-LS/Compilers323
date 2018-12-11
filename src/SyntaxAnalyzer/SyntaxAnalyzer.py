@@ -309,9 +309,8 @@ class SyntaxAnalyzer:
             return
         elif self.t_lexeme("else"):
             self.instruction_generator.back_patch(self.instruction_generator.get_pc() + 2)
-            self.instruction_generator.generate_instruction('PUSHI', 0)
             self.instruction_generator.push_jumpstack(self.instruction_generator.get_pc())
-            self.instruction_generator.generate_instruction('JUMPZ', None)
+            self.instruction_generator.generate_instruction('JUMP', None)
             self.instruction_generator.generate_instruction('LABEL', None)
             self.lexer()
             if self.r_Statement():
