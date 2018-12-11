@@ -1,0 +1,4 @@
+$$
+int i, max;
+while ( i < max)   i  = i  + 1;  whileend
+$$

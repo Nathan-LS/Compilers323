@@ -1,0 +1,9 @@
+Address         OP               Oprnd   
+1               PUSHM            5000    
+2               PUSHM            5001
+3               PUSHM            5002
+4               ADD
+5               ADD
+6               PUSHM            5003
+7               SUB
+8               POPM             5000

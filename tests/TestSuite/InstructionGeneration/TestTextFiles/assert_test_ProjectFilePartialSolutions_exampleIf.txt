@@ -1,0 +1,8 @@
+Address         OP               Oprnd   
+1               PUSHM            5000    
+2               PUSHM            5001    
+3               LES             
+4               JUMPZ            7       
+5               PUSHM            5002    
+6               POPM             5000    
+7               LABEL           

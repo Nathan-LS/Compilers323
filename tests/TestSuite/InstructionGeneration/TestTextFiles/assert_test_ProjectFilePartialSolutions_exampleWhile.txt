@@ -1,0 +1,11 @@
+Address         OP               Oprnd   
+1               LABEL           
+2               PUSHM            5000    
+3               PUSHM            5001    
+4               LES             
+5               JUMPZ            11      
+6               PUSHM            5000    
+7               PUSHI            1       
+8               ADD             
+9               POPM             5000    
+10              JUMP             1       
