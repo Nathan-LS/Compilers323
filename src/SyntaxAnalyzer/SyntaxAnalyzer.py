@@ -565,13 +565,13 @@ class SyntaxAnalyzer:
                                    "  '|'  (  <Expression>  )  '|'  true  '|'  false")
         if self.t_type(TokenInteger) or self.t_type(TokenReal) or self.t_lexeme("true") or self.t_lexeme("false"):
             tok = self.lexer()
-            if (tok.lexeme == "true" or tok.lexeme == "false") and self.t_type(TokenOperator):
+            if (tok.lexeme == "true" or tok.lexeme == "false") and (self.Lexer.lexer_peek().lexeme in ["*", "/", "+", "-"]):
                 raise InvalidBoolUsage(tok)
             self.instruction_generator.generate_instruction('PUSHI', tok.lexeme)
             return
         elif self.t_type(TokenIdentifier):
             tok = self.lexer()
-            if self.symbol_table.identifier_type(tok)=='boolean' and self.t_type(TokenOperator):
+            if self.symbol_table.identifier_type(tok) == 'boolean' and (self.Lexer.lexer_peek().lexeme in ["*", "/", "+", "-"]):
                 raise InvalidBoolUsage(tok)
             self.instruction_generator.generate_instruction('PUSHM', self.symbol_table.get_address(tok))
             if self.t_lexeme("("):
