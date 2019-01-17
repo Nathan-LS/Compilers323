@@ -1,7 +1,7 @@
 import unittest
-from src.__main__ import Main as srcMain
-from src.SyntaxAnalyzer import SyntaxAnalyzer
-from src.Assembler import InstructionGenerator
+from CompilersMain.CompilersMain import CompilersMain
+from SyntaxAnalyzer import SyntaxAnalyzer
+from Assembler import InstructionGenerator
 import os
 import sys
 
@@ -15,7 +15,7 @@ class TestInstructionGeneration(unittest.TestCase):
         output_path = os.path.join(self.test_files, "instructions_" + filename)
         assert_name = os.path.join(self.test_files, "assert_" + filename)
         sys.argv.extend(['-i', input_name])
-        argp = srcMain.get_args()
+        argp = CompilersMain.get_args()
         with open(input_name, 'r') as input_file:
             sa = SyntaxAnalyzer(input_file, argp)
             sa.run_analyzer()

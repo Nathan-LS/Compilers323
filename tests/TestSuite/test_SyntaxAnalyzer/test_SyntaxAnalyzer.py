@@ -1,7 +1,8 @@
 import unittest
 import os
-from src.SyntaxAnalyzer import SyntaxAnalyzer
-from src.__main__ import Main
+from SyntaxAnalyzer import SyntaxAnalyzer
+from CompilersMain.CompilersMain import CompilersMain
+from tests.TestSuite.test_InstructionGeneration import test_InstructionGeneration
 import CompilerExceptions
 import sys
 
@@ -9,8 +10,8 @@ import sys
 class TestSyntaxAnalyzer(unittest.TestCase):
     def setUp(self):
         self.test_files = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'TestTextFiles')
-        p_dir = os.path.join(os.path.abspath(__file__), os.pardir, os.pardir)
-        self.valid_test_files_instrgen = os.path.join(p_dir, 'test_InstructionGeneration', 'TestTextFiles')
+        p_dir = os.path.dirname(os.path.abspath(test_InstructionGeneration.__file__))
+        self.valid_test_files_instrgen = os.path.join(p_dir, 'TestTextFiles')
 
     def helper_valid_files(self):
         for f in os.listdir(self.test_files):
@@ -30,14 +31,14 @@ class TestSyntaxAnalyzer(unittest.TestCase):
     def helper_run_valid(self, file_path):
         sys.argv.extend(['-i', file_path])
         with open(file_path, 'r') as input_file:
-            sa = SyntaxAnalyzer(input_file, Main.get_args())
+            sa = SyntaxAnalyzer(input_file, CompilersMain.get_args())
             sa.r_Rat18F()
 
     def helper_run_invalid(self, filename, line, expect_str):
         input_path = os.path.join(self.test_files, filename)
         sys.argv.extend(['-i', input_path])
         with open(input_path, 'r') as input_file:
-            sa = SyntaxAnalyzer(input_file, Main.get_args())
+            sa = SyntaxAnalyzer(input_file, CompilersMain.get_args())
             with self.assertRaises(CompilerExceptions.CSyntaxError) as ex:
                 sa.r_Rat18F()
             print(ex.exception)
